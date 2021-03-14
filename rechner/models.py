@@ -37,7 +37,7 @@ class Question(models.Model):
     products = models.ManyToManyField(Product)
     
     # Calculation as string. Should be executable using eval(). Eg: "self.products[0]*answer1.amount*Emission5.value"
-    calc_co2 = models.CharField(max_length=200)
+    calc_co2 = models.CharField(max_length=200, default="0")
     
     # Representation
     def __str__(self):
