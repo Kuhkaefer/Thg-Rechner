@@ -14,11 +14,17 @@ class Category(models.Model):
         return self.name
     
     
-# Product
-class Product(models.Model):
+# emission data
+class Emission(models.Model):
     
     # Name of product
     name = models.CharField(max_length=50, unique=True)
+
+    # Emission per kg
+    emission = models.DecimalField()
+
+    # source
+    source = models.CharField(max_length=200, unique=True)
 
     # Representation
     def __str__(self):
@@ -33,11 +39,11 @@ class Question(models.Model):
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name', default='Unsortiert') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
     
-    # Link to products
-    products = models.ManyToManyField(Product)
+    # Link to emission data / separate model for calculation relation (with question, product, calc_co2) if we need multiple emission sources somewhere
+    product = models.ForeignKey(Emission, on_delete=models.CASCADE)
     
-    # Calculation as string. Should be executable using eval(). Eg: "self.products[0]*answer1.amount*Emission5.value"
-    calc_co2 = models.CharField(max_length=200, default="0")
+    # Relation between answer and Emission data (calculation not in models)
+    calc_co2 = models.DecimalField(min_value=0)
     
     # Representation
     def __str__(self):
@@ -48,9 +54,6 @@ class EventTemplate(models.Model):
     
     # Name of event type
     name = models.CharField(max_length=100, unique=True)
-
-    # Link to questions
-    questions = models.ManyToManyField(Question)
 
     # Representation
     def __str__(self):
@@ -63,6 +66,9 @@ class DefaultAmounts(models.Model):
     
     # Link to template
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
+
+    # Default value
+    value = models.DecimalField(min_value=0)
 
     # Representation
     def __str__(self):
