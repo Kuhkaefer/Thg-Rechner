@@ -59,6 +59,7 @@ class EventTemplate(models.Model):
     def __str__(self):
         return self.name
     
+# Defaultwerte
 class DefaultAmounts(models.Model):
 
     # Link to question
@@ -74,3 +75,11 @@ class DefaultAmounts(models.Model):
     def __str__(self):
         return f"default for {self.question.name} in {self.template.name}"
     
+class Source(models.Model):
+    
+    # Name of Source
+    name = models.CharField(max_length=200)
+    
+    # Author
+
+    # Year
