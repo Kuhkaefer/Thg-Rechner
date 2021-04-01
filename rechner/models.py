@@ -38,17 +38,27 @@ class Question(models.Model):
     
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name', default='Unsortiert') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
-    
-    # Link to emission data / separate model for calculation relation (with question, product, calc_co2) if we need multiple emission sources somewhere
-    product = models.ForeignKey(Emission, on_delete=models.CASCADE)
-    
-    # Relation between answer and Emission data (calculation not in models)
-    calc_co2 = models.DecimalField(max_digits=10, decimal_places=5)
-    
+
     # Representation
     def __str__(self):
         return self.question_text
-    
+
+
+class Calculation(models.Model):
+    # Question for which the calculation is
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+    # Link to emission data
+    product = models.ForeignKey(Emission, on_delete=models.CASCADE)
+
+    # Relation between answer and Emission data (calculation not in models)
+    calc_co2 = models.DecimalField(max_digits=10, decimal_places=5)
+
+    # Representation
+    def __str__(self):
+        return self.question.question_text + " " + self.product.name
+
+
 # Templates for Event Types
 class EventTemplate(models.Model):
     
