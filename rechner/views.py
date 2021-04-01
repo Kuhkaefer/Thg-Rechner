@@ -18,10 +18,12 @@ def fill_event_template(request, template_id):
         # do something (validation of user input, ...)
         
         # return something
+        return HttpResponseRedirect(KEINE_AHNUNG)
     
     # First Request of this page (Blank, unbinded Page, if so with default values)
     else:
         # create an instance of the form and populated it with default data
         formset = BookInlineFormSet(initial={"Feld":"irgendwie defaults und so"}, instance=event_template) 
     
-    
+    # Return some render
+    return render(request, 'TOLLES_TEMPLATE.html', {'formset': formset})
