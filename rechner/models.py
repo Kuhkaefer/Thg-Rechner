@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 ## Create your models here.
 
@@ -12,7 +13,16 @@ class Category(models.Model):
     # Representation
     def __str__(self):
         return self.name
-    
+
+
+class Source(models.Model):
+    # Name of Source
+    name = models.CharField(max_length=200)
+
+    # Author
+
+    # Year
+
     
 # emission data
 class Emission(models.Model):
@@ -24,12 +34,13 @@ class Emission(models.Model):
     emission = models.DecimalField(max_digits=10, decimal_places=5)
 
     # source
-    source = models.CharField(max_length=200, unique=True)
+    source = models.ManyToManyField(Source)
 
     # Representation
     def __str__(self):
         return self.name
-    
+
+
 # Question 
 class Question(models.Model):
     
@@ -49,10 +60,10 @@ class Calculation(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
     # Link to emission data
-    product = models.ForeignKey(Emission, on_delete=models.CASCADE)
+    emission = models.ForeignKey(Emission, on_delete=models.CASCADE)
 
     # Relation between answer and Emission data (calculation not in models)
-    calc_co2 = models.DecimalField(max_digits=10, decimal_places=5)
+    ratio = models.DecimalField(max_digits=10, decimal_places=5)
 
     # Representation
     def __str__(self):
@@ -68,7 +79,8 @@ class EventTemplate(models.Model):
     # Representation
     def __str__(self):
         return self.name
-    
+
+
 # Defaultwerte
 class DefaultAmounts(models.Model):
 
@@ -79,17 +91,8 @@ class DefaultAmounts(models.Model):
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
     # Default value
-    value = models.DecimalField(max_digits=10, decimal_places=5)
+    value = models.DecimalField(max_digits=10, decimal_places=5, verbose_name=_('Default Value'))
 
     # Representation
     def __str__(self):
         return f"default for {self.question.name} in {self.template.name}"
-    
-class Source(models.Model):
-    
-    # Name of Source
-    name = models.CharField(max_length=200)
-    
-    # Author
-
-    # Year
