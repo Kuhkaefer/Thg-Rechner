@@ -44,6 +44,9 @@ class Emission(models.Model):
 # Question 
 class Question(models.Model):
     
+    # short name
+    name = models.CharField(max_length=100)
+    
     # Text of question
     question_text = models.CharField(max_length=200)
     
