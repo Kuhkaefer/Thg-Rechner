@@ -21,7 +21,7 @@ class Emission(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     # Emission per kg
-    emission = models.DecimalField()
+    emission = models.DecimalField(max_digits=10, decimal_places=5)
 
     # source
     source = models.CharField(max_length=200, unique=True)
@@ -43,7 +43,7 @@ class Question(models.Model):
     product = models.ForeignKey(Emission, on_delete=models.CASCADE)
     
     # Relation between answer and Emission data (calculation not in models)
-    calc_co2 = models.DecimalField()
+    calc_co2 = models.DecimalField(max_digits=10, decimal_places=5)
     
     # Representation
     def __str__(self):
@@ -69,7 +69,7 @@ class DefaultAmounts(models.Model):
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
     # Default value
-    value = models.DecimalField()
+    value = models.DecimalField(max_digits=10, decimal_places=5)
 
     # Representation
     def __str__(self):
