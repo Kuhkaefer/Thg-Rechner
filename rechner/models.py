@@ -67,7 +67,7 @@ class Calculation(models.Model):
 
     # Representation
     def __str__(self):
-        return self.question.question_text + " " + self.product.name
+        return self.question.question_text + " " + self.emission.name
 
 
 # Templates for Event Types
