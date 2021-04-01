@@ -43,7 +43,7 @@ class Question(models.Model):
     product = models.ForeignKey(Emission, on_delete=models.CASCADE)
     
     # Relation between answer and Emission data (calculation not in models)
-    calc_co2 = models.DecimalField(min_value=0)
+    calc_co2 = models.DecimalField()
     
     # Representation
     def __str__(self):
@@ -69,7 +69,7 @@ class DefaultAmounts(models.Model):
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
     # Default value
-    value = models.DecimalField(min_value=0)
+    value = models.DecimalField()
 
     # Representation
     def __str__(self):
