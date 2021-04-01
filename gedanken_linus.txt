@@ -1,6 +1,0 @@
-# Models
-- Beschreibung von Struktur von Dingen, die in Datenbank gespeichert werden sollen.
-- Admin kann Instanzen dieser Modelle erzeugen, und diese in der Datenbank abspeicher.
-
-# Forms
-- Möglichkeit, um Instanzen von Models zu bearbeiten
