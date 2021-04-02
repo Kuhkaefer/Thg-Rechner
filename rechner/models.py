@@ -41,11 +41,27 @@ class Emission(models.Model):
         return self.name
 
 
+# Templates for Event Types
+class EventTemplate(models.Model):
+    
+    # Name of event type
+    name = models.CharField(max_length=100, unique=True)
+    
+    # Short name of event type
+    shorty = models.CharField(max_length=15, unique=True)
+    
+    # Link to Questions
+    #question = models.ManyToManyField(Question)
+
+    # Representation
+    def __str__(self):
+        return self.name
+
 # Question 
 class Question(models.Model):
     
     # short name
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True)
     
     # Text of question
     question_text = models.CharField(max_length=200)
@@ -53,6 +69,9 @@ class Question(models.Model):
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name', default='Unsortiert') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
 
+    # Link to event template
+    event_template = models.ManyToManyField(EventTemplate)
+    
     # Representation
     def __str__(self):
         return self.question_text
@@ -72,16 +91,6 @@ class Calculation(models.Model):
     def __str__(self):
         return self.question.question_text + " " + self.emission.name
 
-
-# Templates for Event Types
-class EventTemplate(models.Model):
-    
-    # Name of event type
-    name = models.CharField(max_length=100, unique=True)
-
-    # Representation
-    def __str__(self):
-        return self.name
 
 
 # Defaultwerte

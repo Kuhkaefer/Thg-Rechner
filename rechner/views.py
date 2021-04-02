@@ -1,5 +1,13 @@
 from django.shortcuts import render
 from django.forms import inlineformset_factory
+from .models import EventTemplate, Question
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+
+## Index Seite
+def index(request):
+    return HttpResponse(f"Hello, world. You're at the rechner index.")
+
 
 ## Abfrage-Seite
 def fill_event_template(request, template_id):
@@ -18,12 +26,13 @@ def fill_event_template(request, template_id):
         # do something (validation of user input, ...)
         
         # return something
-        return HttpResponseRedirect(KEINE_AHNUNG)
+        return HttpResponseRedirect('/index')
     
     # First Request of this page (Blank, unbinded Page, if so with default values)
     else:
         # create an instance of the form and populated it with default data
-        formset = BookInlineFormSet(initial={"Feld":"irgendwie defaults und so"}, instance=event_template) 
+        formset = EvTempInlineFormSet(initial={"Feld":"irgendwie defaults und so"}, instance=event_template) 
     
     # Return some render
-    return render(request, 'TOLLES_TEMPLATE.html', {'formset': formset})
+    #return render(request, 'TOLLES_TEMPLATE.html', {'formset': formset})
+    return HttpResponse("You're on template %s." % template_id)
