@@ -8,6 +8,7 @@
 - In Form werden Felder definiert
 - wird in views importiert. view zeigt form an.
 - Forms haben nichts mit Datenbank zu tun
+- Forms lassen sich leicht in html "drucken". mit forms.to_table. Dann wird für jedes Objekt der Form der Name des Objects und das Feld angezeigt. (name = models.Charfield()). Wir wollen aber, dass der String in dem Objekt agezeigt wird.
 
 # Model Forms
 - Forms, die Felder von Modellen verwenden

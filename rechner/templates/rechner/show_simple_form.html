@@ -1,0 +1,12 @@
+
+{% block content %}
+  <h1>Name: {{ template_instance.name}}</h1>
+ 
+  <form action="" method="post">
+    {% csrf_token %}
+    <table>
+    {{ form.question_field }}
+    </table>
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}
