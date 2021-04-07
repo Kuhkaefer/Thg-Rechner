@@ -15,28 +15,31 @@ def index(request):
 def fill_event_template(request, template_id):
     
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
+    question = get_object_or_404(Question, pk=1) 
     
-    # NOT the forst request of the page (user populated fields. Form is bound to user.)
+
+        # NOT the forst request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
-        # create an instance of the form and populated it with the user data
-        form = FillEvent(request.POST)
         
-        # do something (validation of user input, ...)
-        if form.is_valid():
-            print(form.cleaned_data['number'])
+        first = False
+        #create an instance of the form and populated it with the user data
+        #form = FillEvent(request.POST)
         
-        # return something
-        return HttpResponseRedirect('/rechner')
+        #do something (validation of user input, ...)
+        #if form.is_valid():
+            #print(form.cleaned_data['number'])
+        
+        #return something
+        #return HttpResponseRedirect('/rechner')
     
     # First Request of this page (Blank, unbinded Page, if so with default values)
     else:
-        # create an instance of the form and populated it with default data
-        form = FillEvent() 
-        
+        first = True
     
     context = {
-        'form': form,
-        'template_instance':event_template
+        'template_instance':event_template,
+        'question_instance':question,
+        'defaults' :"3" if first else ""
     }
     
     # Return some render
