@@ -47,11 +47,8 @@ class EventTemplate(models.Model):
     # Name of event type
     name = models.CharField(max_length=100, unique=True)
     
-    # Short name of event type
+    # Short name of event type for url display
     shorty = models.CharField(max_length=15, unique=True)
-    
-    # Link to Questions
-    #question = models.ManyToManyField(Question)
 
     # Representation
     def __str__(self):
@@ -70,13 +67,18 @@ class Question(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name', default='Unsortiert') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
 
     # Link to event template
-    event_template = models.ManyToManyField(EventTemplate)
+    event_template = models.ManyToManyField(EventTemplate, through='EventTemplateQuestion')
     
     # Representation
     def __str__(self):
         return self.question_text
 
+# Through Model
+class EventTemplateQuestion(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    event_template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
+# Berechnung
 class Calculation(models.Model):
     # Question for which the calculation is
     question = models.ForeignKey(Question, on_delete=models.CASCADE)

@@ -16,12 +16,14 @@ def fill_event_template(request, template_id):
     event_template = EventTemplate.objects.get(pk=template_id)
     
     # Get Inline Formset (form that takes field from all Questions related to eventTemplate )
-    EvTempInlineFormSet = inlineformset_factory(EventTemplate, Question, fields='question_text')
+    print("lel")
+    EvTempInlineFormSet = inlineformset_factory(EventTemplate, Question.event_template.through, fields=('question_text',))
+    print("lol")
     
     # NOT the forst request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
         # create an instance of the form and populated it with the user data
-        formset = BookInlineFormSet(request.POST, instance=event_template)
+        formset = EvTempInlineFormSet(request.POST, instance=event_template)
         
         # do something (validation of user input, ...)
         
