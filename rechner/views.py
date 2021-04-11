@@ -21,19 +21,16 @@ def fill_event_template(request, template_id):
     
     for q in questions:
         print(q.name)
+    
+    defaults = [1,2]
 
         # NOT the forst request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
         
         first = False
-        #create an instance of the form and populated it with the user data
-        #form = FillEvent(request.POST)
-        
-        #do something (validation of user input, ...)
-        #if form.is_valid():
-            #print(form.cleaned_data['number'])
-        
-        #return something
+        for q in questions:
+            print(f"your answer for {q.name}: {request.POST.get(q.name)}")
+            
         #return HttpResponseRedirect('/rechner')
     
     # First Request of this page (Blank, unbinded Page, if so with default values)
@@ -42,10 +39,8 @@ def fill_event_template(request, template_id):
     
     context = {
         'template_instance':event_template,
-        'question_instances':questions,
-        'defaults' :"3" if first else ""
+        'q_and_d':zip(questions,defaults),
     }
     
     # Return some render
-    #return render(request, 'TOLLES_TEMPLATE.html', {'formset': formset})
     return render(request, 'rechner/show_simple_form.html', context)

@@ -1,14 +1,14 @@
 
 {% block content %}
   <h1>Event-type: {{ template_instance.name}}</h1>
-   {% for q in question_instances%}
+   {% for q,d in q_and_d%}
   <p>Question {{forloop.counter}}: {{q.question_text }}</p>
   <form action="" method="post">
     {% csrf_token %}
     <table>
-    <input id="id_subject" type="text" name="subject" maxlength="100" required value={{defaults}}>
+    <input id="id_subject" type="text" name={{q.name}} maxlength="100" required value={{d}}>
+  {% endfor %}
     </table>
     <input type="submit" value="Submit">
   </form>
-  {% endfor %}
 {% endblock %}
