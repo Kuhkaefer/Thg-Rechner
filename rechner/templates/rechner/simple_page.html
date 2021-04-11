@@ -7,8 +7,14 @@
 
 
 {% block content %}
-
 <h3> {{page_header}}</h1>
 <p> {{page_description}} </p>
+{% endblock %}
 
+{% block button %}
+{% if button_link != None %}
+<button type='submit' onclick="location.href='{{button_link}}'">
+{{button_text}}
+</button>
+{% endif %}
 {% endblock %}
