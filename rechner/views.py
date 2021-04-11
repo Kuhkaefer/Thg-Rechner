@@ -8,8 +8,24 @@ from rechner.forms import FillEvent
 
 ## Index Seite
 def index(request):
-    return HttpResponse(f"Hello, world. You're at the rechner index.")
+    print("back on rechner index")
+    context = {
+        'page_name':'CO2 Rechner',
+        'page_header':'CO2 Rechner',
+        'page_description':'Wait for it'
+        }
+    return render(request,'rechner/simple_page.html',context)
 
+## Ergebnis Seite
+def result(request):
+    context = {
+        'page_name':'CO2 Result',
+        'page_header':'Your input',
+        'page_description':'discombobulated combobulator'
+        }
+    
+    return render(request, 'rechner/simple_page.html', context)
+    
 
 ## Abfrage-Seite
 def fill_event_template(request, template_id):
@@ -24,14 +40,18 @@ def fill_event_template(request, template_id):
         print(q.name)
         defaults.append(DefaultAmounts.objects.all().filter(template=event_template,question=q)[0].value)
 
-        # NOT the forst request of the page (user populated fields. Form is bound to user.)
+        # NOT the first request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
         
         first = False
-        for q in questions:
+        
+        for i,q in enumerate(questions):
             print(f"your answer for {q.name}: {request.POST.get(q.name)}")
+            defaults[i] = request.POST.get(q.name)
+        
+        request.session['user_input'] = defaults
             
-        #return HttpResponseRedirect('/rechner')
+        return HttpResponseRedirect('/rechner/result')
     
     # First Request of this page (Blank, unbinded Page, if so with default values)
     else:
@@ -40,6 +60,7 @@ def fill_event_template(request, template_id):
     context = {
         'template_instance':event_template,
         'q_and_d':zip(questions,defaults),
+        'page_name':f"CO2 bei {event_template.name}"
     }
     
     # Return some render

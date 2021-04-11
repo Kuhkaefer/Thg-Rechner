@@ -1,6 +1,12 @@
-
+from django.shortcuts import render, get_object_or_404, get_list_or_404  
 from django.http import HttpResponse
 
 
 def home(request):
-    return HttpResponse(f"Home Page. Look around. Nice and homely here. Soothing. Welcome. ")
+    context = {
+        'page_name':'Klimarina',
+        'page_header':'Home',
+        'page_description':'Look around. Nice and homely here. Soothing. Welcome.'
+        }
+    
+    return render(request, 'rechner/simple_page.html', context)
