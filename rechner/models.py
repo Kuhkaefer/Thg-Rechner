@@ -52,7 +52,7 @@ class Question(models.Model):
     question_text = models.CharField(max_length=200)
     
     # Link to category
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name', default='Unsortiert') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name') # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
     
     # Representation
     def __str__(self):
@@ -76,9 +76,9 @@ class EventTemplate(models.Model):
         return self.name
     
 # Through Model
-class EventTemplateQuestion(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    event_template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
+#class EventTemplateQuestion(models.Model):
+    #question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    #event_template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
 # Berechnung
 class Calculation(models.Model):

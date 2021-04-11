@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404  
+from django.shortcuts import render, get_object_or_404, get_list_or_404  
 from django.forms import inlineformset_factory
 from .models import EventTemplate, Question
 from django.http import HttpResponse
@@ -15,8 +15,12 @@ def index(request):
 def fill_event_template(request, template_id):
     
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
-    question = get_object_or_404(Question, pk=1) 
+    questions = event_template.questions.all()
     
+    print(questions[0].question_text)
+    
+    for q in questions:
+        print(q.name)
 
         # NOT the forst request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
@@ -38,7 +42,7 @@ def fill_event_template(request, template_id):
     
     context = {
         'template_instance':event_template,
-        'question_instance':question,
+        'question_instances':questions,
         'defaults' :"3" if first else ""
     }
     

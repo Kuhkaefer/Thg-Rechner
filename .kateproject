@@ -1,0 +1,4 @@
+{
+"name":"thg-webapp"   
+, "files": [ { "directory": "../thg-webapp", "recursive": 1 } ]
+}
