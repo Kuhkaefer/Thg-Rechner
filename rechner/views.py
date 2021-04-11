@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404  
 from django.forms import inlineformset_factory
-from .models import EventTemplate, Question
+from .models import EventTemplate, Question, DefaultAmounts
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 
@@ -19,10 +19,10 @@ def fill_event_template(request, template_id):
     
     print(questions[0].question_text)
     
+    defaults = []
     for q in questions:
         print(q.name)
-    
-    defaults = [1,2]
+        defaults.append(DefaultAmounts.objects.all().filter(template=event_template,question=q)[0].value)
 
         # NOT the forst request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
