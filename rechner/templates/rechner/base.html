@@ -44,10 +44,11 @@
 
 <body>
     <div class="sidenav">
-        <a href="/home">Home</a>
+        <a href="/">Home</a>
         <a href="/rechner">Rechner</a>
     </div>
     <div id="content", name="content", class="main">
+        <h2>{% block header %} {% endblock %} </h1>
         {% block content %}
         {% endblock %}
         {% block button %}

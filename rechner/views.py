@@ -9,12 +9,14 @@ from rechner.forms import FillEvent
 ## Index Seite
 def index(request):
     print("back on rechner index")
+    
     context = {
         'page_name':'CO2 Rechner',
         'page_header':'CO2 Rechner',
-        'page_description':'Wait for it'
+        'page_text':'Wait for it.\nChoose an event template',
+        'event_templates':EventTemplate.objects.all()
         }
-    return render(request,'rechner/simple_page.html',context)
+    return render(request,'rechner/choose_eventtemplate.html',context)
 
 ## Ergebnis Seite
 def result(request):
@@ -60,7 +62,8 @@ def fill_event_template(request, template_id):
     context = {
         'template_instance':event_template,
         'q_and_d':zip(questions,defaults),
-        'page_name':f"CO2 bei {event_template.name}"
+        'page_name':f"CO2 bei {event_template.name}",
+        'page_header':f"Event: {event_template.name}"
     }
     
     # Return some render

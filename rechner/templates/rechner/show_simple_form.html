@@ -1,11 +1,14 @@
 {% extends 'rechner/base.html' %}
 
 {% block title %}
-{{page_name}}
+{{ page_name }}
+{% endblock %}
+
+{% block header %} 
+    {{ page_header }}
 {% endblock %}
 
 {% block content %}
-  <h1>Event-type: {{ template_instance.name}}</h1>
    {% for q,d in q_and_d%}
   <p>Question {{forloop.counter}}: {{q.question_text }}</p>
   <form action="" method="post">

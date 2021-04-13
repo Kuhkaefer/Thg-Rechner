@@ -1,0 +1,18 @@
+{% extends 'rechner/base.html' %}
+
+{% block title %}
+    {{page_name}}
+{% endblock %}
+
+{% block header %}
+    {{page_header}}
+{% endblock %}
+
+{% block content %}
+    <p>{{page_text}}</p>
+    <select>
+    {% for template in event_templates %}
+    <option value="{{template.pk}}">{{template.name}}</option>
+    {% endfor %}
+    </select>
+{% endblock %}
