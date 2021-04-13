@@ -10,11 +10,30 @@ from rechner.forms import FillEvent
 def index(request):
     print("back on rechner index")
     
+    page_text = f"Wait for it.\nChoose an event template"
+    
+    # If button clicked (I think)
+    if request.method == "POST":
+       choice= request.POST.get('chosen_template')
+       print(len(choice))
+       if choice is "":
+           choice = "/rechner"
+           print(choice)
+           page_text += '. WRONG CHOICE'
+           print("wrong choice")
+       else:       
+           return HttpResponseRedirect(f'{choice}')
+       
+    else:
+        choice=""
+    
     context = {
         'page_name':'CO2 Rechner',
         'page_header':'CO2 Rechner',
-        'page_text':'Wait for it.\nChoose an event template',
-        'event_templates':EventTemplate.objects.all()
+        'page_text':page_text,
+        'event_templates':EventTemplate.objects.all(),
+        'button_link':'/rechner',
+        'button_text':'Go!'
         }
     return render(request,'rechner/choose_eventtemplate.html',context)
 

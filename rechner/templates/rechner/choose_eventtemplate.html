@@ -10,9 +10,20 @@
 
 {% block content %}
     <p>{{page_text}}</p>
-    <select>
-    {% for template in event_templates %}
-    <option value="{{template.pk}}">{{template.name}}</option>
-    {% endfor %}
-    </select>
+    <form  method='POST'>
+        {% csrf_token %}
+        <select name = "chosen_template"> 
+            <option value="">
+                Choose...
+            </option>
+            {% for template in event_templates %}
+                <option value="{{template.pk}}">
+                    {{template.name}}
+                </option>
+            {% endfor %}
+        </select>
+        <button type='submit' onclick="location.href='{{button_link}}'">
+        {{button_text}}
+        </button>
+    </form>
 {% endblock %}
