@@ -41,8 +41,8 @@ def index(request):
 def result(request):
     context = {
         'page_name':'CO2 Result',
-        'page_header':'Your input',
-        'page_description':'discombobulated combobulator'
+        'page_header':'CO2 Result',
+        'page_description': f'discombobulated combobulator. { request.session["user_input"] }'
         }
     
     return render(request, 'rechner/simple_page.html', context)
