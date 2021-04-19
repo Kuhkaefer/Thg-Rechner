@@ -93,6 +93,7 @@ def fill_event_template(request, template_id):
         'q_and_d':zip(questions,defaults,new_cat),
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Event: {event_template.name}",
+        'button_link':'/rechner'
     }
     
     # Render Form

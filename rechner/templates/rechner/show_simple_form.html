@@ -23,7 +23,13 @@
             {% endfor %}
         </table>
         <br>
-        <input type="submit" value="Submit">
+        <table>
+            <tr>
+                <td> <input type="submit" value="Submit"> </td>
+                <td> <input type="reset" value="Reset"> </td>
+                <td> <input type='button'  value="Back" onclick="location.href='{{button_link}}'"> </td>
+            </tr>
+        </table>
     </form>
  
 {% endblock %}
