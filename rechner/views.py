@@ -16,7 +16,7 @@ def index(request):
     if request.method == "POST":
        choice= request.POST.get('chosen_template')
        print(len(choice))
-       if choice is "":
+       if choice == "":
            choice = "/rechner"
            print(choice)
            page_text += '. WRONG CHOICE'
@@ -57,8 +57,15 @@ def fill_event_template(request, template_id):
     
     # Get chosen Template and related questions
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
-    questions = event_template.questions.all().order_by('category')
+    dfs = event_template.defaultamounts_set.all()#.order_by('category')
+    questions = []
+    for df in dfs:
+        questions.append(df.question)
     
+    def sort_f(q):
+        return q.category.id
+    
+    questions.sort(key=sort_f)
     # get defaults and list with 1, if question category is new
     defaults = []
     old_cat = ""
