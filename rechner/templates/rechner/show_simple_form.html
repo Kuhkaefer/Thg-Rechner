@@ -9,14 +9,22 @@
 {% endblock %}
 
 {% block content %}
-   {% for q,d in q_and_d%}
-  <p>Question {{forloop.counter}}: {{q.question_text }}</p>
-  <form action="" method="post">
-    {% csrf_token %}
-    <table>
-    <input id="id_subject" type="text" name={{q.name}} maxlength="100" required value={{d}}>
-  {% endfor %}
-    </table>
-    <input type="submit" value="Submit">
-  </form>
+    <form action="" method="post">
+        <table style="width:50%">
+            {% for q,d,nc in q_and_d%}
+                {% if nc == 1 %}
+                    <tr>  <th> <br> {{q.category}}  </th> </tr>
+                {% endif %}
+                <tr>
+                    <td>Question {{forloop.counter}}: {{q.question_text }}</td>
+                    {% csrf_token %}
+                    <td>     <input id="id_subject" type="text" name={{q.name}} maxlength="100" required value={{d}}> </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+ 
 {% endblock %}
+
