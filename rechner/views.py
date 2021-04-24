@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404  
 from django.forms import inlineformset_factory
-from .models import EventTemplate, Question, DefaultAmounts
+from .models import EventTemplate, Question, DefaultAmounts, Category
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import numpy as np
@@ -57,21 +57,22 @@ def fill_event_template(request, template_id):
     
     # Get chosen Template and related questions
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
-    dfs = event_template.defaultamounts_set.all()#.order_by('category')
+    dfs = event_template.defaultamounts_set.all()
     questions = []
     for df in dfs:
         questions.append(df.question)
     
+    # sort by category
     def sort_f(q):
         return q.category.id
-    
     questions.sort(key=sort_f)
+    
     # get defaults and list with 1, if question category is new
     defaults = []
     old_cat = ""
     new_cat = np.zeros(len(questions))
     for i,q in enumerate(questions):
-        defaults.append(DefaultAmounts.objects.all().filter(template=event_template,question=q)[0].value)
+        defaults.append(dfs.get(question=q).value)
         if old_cat != q.category:
             new_cat[i] = 1
             old_cat = q.category
@@ -94,13 +95,18 @@ def fill_event_template(request, template_id):
     else:
         pass
     
+    # Get categories
+    categories = Category.objects.all()
+    
+    
     # Create context
     context = {
         'template_instance':event_template,
         'q_and_d':zip(questions,defaults,new_cat),
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Event: {event_template.name}",
-        'button_link':'/rechner'
+        'button_link':'/rechner',
+        'categories':categories
     }
     
     # Render Form
