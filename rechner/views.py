@@ -88,7 +88,6 @@ def fill_event_template(request, template_id):
     # User submitted the form
     if (request.method == "POST") and request.POST.get("submit"):
         
-        print("submitted")
         
         # get user input
         user_input = defaults.copy() # (to get the same size)
@@ -97,6 +96,9 @@ def fill_event_template(request, template_id):
         
         # Save user_input as session
         request.session['user_input'] = user_input
+        
+        # keep userinput → as default
+        defaults = user_input
             
         # Move on to next page
         return HttpResponseRedirect('/rechner/result')
@@ -104,25 +106,25 @@ def fill_event_template(request, template_id):
     elif (request.method == "POST") and request.POST.get("add_field"):
         
         # get user input
+        print(defaults)
         user_input = defaults.copy() # (to get the same size)
         for i,q in enumerate(questions):
             user_input[i] = request.POST.get(q.name)
+            print(q.name)
+        print(user_input)
         
         # Save user_input as session
         request.session['user_input'] = user_input
-    
         
+        # keep userinput → as default
+        defaults = user_input
+    
         # update new_question list
         new_q_id_list = request.session['new_q_id_list'] 
-        print("again")
-        print(new_q_id_list)
-        print(f"request.POST.get('new_field'): {request.POST.get('new_field')}")
-        if request.POST.get("new_field") != False:
+        if (request.POST.get("new_field") != False) and (request.POST.get("new_field") != None):
             new_question_id = request.POST.get("new_field")
             new_q_id_list.append(new_question_id)
-        else:
-            print("False input")
-        print(new_q_id_list)
+        
         request.session['new_q_id_list'] = new_q_id_list
         
     # First Request of this page (Blank, unbinded Page, if so with default values)
@@ -136,16 +138,18 @@ def fill_event_template(request, template_id):
     # Get categories
     categories = Category.objects.all()
     
-    # Get all question as list:
-    q_list = [None]*Question.objects.all().count()
-    for i,q in enumerate(Question.objects.all()):
-       q_list[i] =q
-       
     # get new question list form ids
     new_q_list = []
     for id in new_q_id_list:
         new_q_list.append(Question.objects.get(pk=id))
     
+    # Get all (not yet existing question as list:
+    q_list = [None]*Question.objects.all().count()
+    for i,q in enumerate(Question.objects.all()):
+        if q not in questions and q not in new_q_list:  
+            q_list[i] =q
+            
+       
     # Create context
     context = {
         'template_instance':event_template,

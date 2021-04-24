@@ -16,6 +16,7 @@
                 {% if first %}
                     <tr>  <th> <br> {{q.category}}  </th> </tr>
                 {% endif %}
+                
                 <tr>
                     <td>Question {{forloop.counter}}: {{q.question_text }}</td>
                     <td> <input id="id_subject" type="text" name={{q.name}} maxlength="100" required value={{d}}> </td>
