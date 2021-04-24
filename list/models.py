@@ -21,6 +21,9 @@ class Emission(models.Model):
         help_text='Wähle eine Kategorie für die Emission'
         )
 
+    class Meta:
+        verbose_name_plural = "Emissionen"
+
     def __str__(self):
         return self.name
 
@@ -29,6 +32,9 @@ class Kategorie(models.Model):
     name = models.CharField(
         max_length=200
         )
+
+    class Meta:
+        verbose_name_plural = "Kategorien"
 
     def __str__(self):
         return self.name
@@ -44,4 +50,24 @@ class Frage(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         help_text='Wähle eine Kategorie für die Frage'
-    )
+        )
+
+    class Meta:
+        verbose_name_plural = "Fragen"
+
+    def __str__(self):
+        return self.name
+
+class Veranstaltungstyp(models.Model):
+    name = models.CharField(
+        max_length=200,
+        help_text='Füge einen Titel für die Art der Veranstaltung hinzu',
+        )
+    frage = models.ManyToManyField(Frage, help_text='Wähle Fragen für den Veranstaltungstyp aus'
+        )
+
+    class Meta:
+        verbose_name_plural = 'Veranstaltungstypen'
+
+    def __str__(self):
+        return self.name
