@@ -11,8 +11,8 @@
 {% block content %}
     <form action="" method="post">
         <table style="width:50%">
-            {% for q,d,nc in q_and_d%}
-                {% if nc == 1 %}
+            {% for q,d,first,last in q_d_f_and_l %}
+                {% if first %}
                     <tr>  <th> <br> {{q.category}}  </th> </tr>
                 {% endif %}
                 <tr>
@@ -20,16 +20,29 @@
                     {% csrf_token %}
                     <td>     <input id="id_subject" type="text" name={{q.name}} maxlength="100" required value={{d}}> </td>
                 </tr>
+                
+                {% if last %}
+                    <tr> <td>---</td> </tr>
+                    <tr> 
+                        <td> Posten hinzufügen: </td>
+                        <td>
+                            <form method="post">
+                                <select name="chosen_category">
+                                    <option value="False"> Choose... </option>
+                                    {% for new_q in q_list %}
+                                        {% if new_q.category == q.category %}
+                                            <option value="{{new_q.id}}"> {{ new_q.name }} </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                {% endif %}
             {% endfor %}
         </table>
         <br>
         
-        <form>
-            {{% for cat in categories %}}
-            <option value="{{cat.id}}"> {{ cat.name }} </option>
-            {{% endfor %}}
-        
-        </form>
         
         <table>
             <tr>

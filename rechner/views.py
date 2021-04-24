@@ -70,12 +70,19 @@ def fill_event_template(request, template_id):
     # get defaults and list with 1, if question category is new
     defaults = []
     old_cat = ""
-    new_cat = np.zeros(len(questions))
+    first_in_cat = np.zeros(len(questions), dtype=bool)
+    last_in_cat = np.zeros(len(questions), dtype=bool)
     for i,q in enumerate(questions):
         defaults.append(dfs.get(question=q).value)
+        # mark first question of category
         if old_cat != q.category:
-            new_cat[i] = 1
+            first_in_cat[i] = True
+            # mark last question of category
+            if i>0:
+                last_in_cat[i-1] = True
             old_cat = q.category
+    last_in_cat[i] = True
+    print(last_in_cat)
             
     # NOT the first request of the page (user populated fields. Form is bound to user.)
     if request.method == "POST":
@@ -98,15 +105,21 @@ def fill_event_template(request, template_id):
     # Get categories
     categories = Category.objects.all()
     
+    # Get all question as list:
+    q_list = [None]*Question.objects.all().count()
+    for i,q in enumerate(Question.objects.all()):
+       q_list[i] =q
+    
     
     # Create context
     context = {
         'template_instance':event_template,
-        'q_and_d':zip(questions,defaults,new_cat),
+        'q_d_f_and_l':zip(questions,defaults,first_in_cat, last_in_cat),
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Event: {event_template.name}",
         'button_link':'/rechner',
-        'categories':categories
+        'categories':categories,
+        'q_list':q_list,
     }
     
     # Render Form
