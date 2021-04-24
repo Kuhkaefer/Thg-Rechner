@@ -82,13 +82,16 @@ def fill_event_template(request, template_id):
                 last_in_cat[i-1] = True
             old_cat = q.category
     last_in_cat[i] = True
-    print(last_in_cat)
+    
+    
             
-    # NOT the first request of the page (user populated fields. Form is bound to user.)
-    if request.method == "POST":
+    # User submitted the form
+    if (request.method == "POST") and request.POST.get("submit"):
+        
+        print("submitted")
         
         # get user input
-        user_input = defaults
+        user_input = defaults.copy() # (to get the same size)
         for i,q in enumerate(questions):
             user_input[i] = request.POST.get(q.name)
         
@@ -98,9 +101,37 @@ def fill_event_template(request, template_id):
         # Move on to next page
         return HttpResponseRedirect('/rechner/result')
     
+    elif (request.method == "POST") and request.POST.get("add_field"):
+        
+        # get user input
+        user_input = defaults.copy() # (to get the same size)
+        for i,q in enumerate(questions):
+            user_input[i] = request.POST.get(q.name)
+        
+        # Save user_input as session
+        request.session['user_input'] = user_input
+    
+        
+        # update new_question list
+        new_q_id_list = request.session['new_q_id_list'] 
+        print("again")
+        print(new_q_id_list)
+        print(f"request.POST.get('new_field'): {request.POST.get('new_field')}")
+        if request.POST.get("new_field") != False:
+            new_question_id = request.POST.get("new_field")
+            new_q_id_list.append(new_question_id)
+        else:
+            print("False input")
+        print(new_q_id_list)
+        request.session['new_q_id_list'] = new_q_id_list
+        
     # First Request of this page (Blank, unbinded Page, if so with default values)
     else:
-        pass
+        # init list for potential new fields
+        new_q_id_list = []
+        print("first")
+        print(new_q_id_list)
+        request.session['new_q_id_list'] = new_q_id_list
     
     # Get categories
     categories = Category.objects.all()
@@ -109,7 +140,11 @@ def fill_event_template(request, template_id):
     q_list = [None]*Question.objects.all().count()
     for i,q in enumerate(Question.objects.all()):
        q_list[i] =q
-    
+       
+    # get new question list form ids
+    new_q_list = []
+    for id in new_q_id_list:
+        new_q_list.append(Question.objects.get(pk=id))
     
     # Create context
     context = {
@@ -120,6 +155,7 @@ def fill_event_template(request, template_id):
         'button_link':'/rechner',
         'categories':categories,
         'q_list':q_list,
+        'new_q_list':new_q_list,
     }
     
     # Render Form
