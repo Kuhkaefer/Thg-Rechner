@@ -9,7 +9,6 @@ from rechner.forms import FillEvent
 
 ## Index Seite
 def index(request):
-    
     page_text = f"Choose an event template"
     
     # Check choice, If button clicked (I think)
@@ -46,7 +45,7 @@ def result(request):
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
-        'page_description': f'discombobulated combobulator. { request.session["user_input"] }'
+        'page_description': f'discombobulated combobulator. { [request.session["user_input"],request.session["user_input_new_q"]] }'
         }
     
     return render(request, 'rechner/simple_page.html', context)
@@ -55,6 +54,32 @@ def result(request):
 ## Abfrage-Seite
 def fill_event_template(request, template_id):
     
+## Helper functions
+    def save_user_input(request, defaults,new_d_list,new_q_id_list):  
+        
+        #print(f"keys: {request.POST.keys()}")
+        #print(f"4: {request.POST.get('4')}")
+        
+        # get user input for template questions
+        for i,q in enumerate(questions):
+            defaults[i] = request.POST.get(str(q.pk))
+            
+        # get user input for new questions
+        for i,qid in enumerate(new_q_id_list):
+            #print(f"qid: ")
+            #print(qid)
+            new_d_list[i] = request.POST.get(str(int(qid)))
+            
+        #print("new_d_list")
+        #print(new_d_list)
+        
+        # Save user_input as session
+        request.session['user_input'] = defaults
+        request.session['user_input_new_q'] = new_d_list
+        
+        return request, defaults
+    
+## Preparation
     # Get chosen Template and related questions
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
     dfs = event_template.defaultamounts_set.all()
@@ -67,7 +92,7 @@ def fill_event_template(request, template_id):
         return q.category.id
     questions.sort(key=sort_f)
     
-    # get defaults and list with 1, if question category is new
+    # get defaults and list with info, wether question is first or last in category
     defaults = []
     old_cat = ""
     first_in_cat = np.zeros(len(questions), dtype=bool)
@@ -83,72 +108,73 @@ def fill_event_template(request, template_id):
             old_cat = q.category
     last_in_cat[i] = True
     
-    
             
+## Check user input            
+
     # User submitted the form
-    if (request.method == "POST") and request.POST.get("submit"):
-        
-        
-        # get user input
-        user_input = defaults.copy() # (to get the same size)
-        for i,q in enumerate(questions):
-            user_input[i] = request.POST.get(q.name)
-        
-        # Save user_input as session
-        request.session['user_input'] = user_input
-        
-        # keep userinput → as default
-        defaults = user_input
-            
-        # Move on to next page
-        return HttpResponseRedirect('/rechner/result')
+    if (request.method == "POST"):
     
-    elif (request.method == "POST") and request.POST.get("add_field"):
-        
-        # get user input
-        print(defaults)
-        user_input = defaults.copy() # (to get the same size)
-        for i,q in enumerate(questions):
-            user_input[i] = request.POST.get(q.name)
-            print(q.name)
-        print(user_input)
-        
-        # Save user_input as session
-        request.session['user_input'] = user_input
-        
-        # keep userinput → as default
-        defaults = user_input
-    
-        # update new_question list
+        # get previous new_question and defalist
         new_q_id_list = request.session['new_q_id_list'] 
-        if (request.POST.get("new_field") != False) and (request.POST.get("new_field") != None):
-            new_question_id = request.POST.get("new_field")
-            new_q_id_list.append(new_question_id)
+        new_d_list = request.session['user_input_new_q'] 
+            
+        # save user input in question fields
+        request, defaults = save_user_input(request, defaults,new_d_list,new_q_id_list)
+    
+        # Check if user added field
+        added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
         
-        request.session['new_q_id_list'] = new_q_id_list
+        # User added field
+        if added_field_qid >= 0:
+            
+            print(f"field added. With question {added_field_qid}")
+            
+            # update new_question list
+            new_q_id_list.append(added_field_qid)
+            request.session['new_q_id_list'] = new_q_id_list
+            new_d_list.append("0")
+            request.session['user_input_new_q']  = new_d_list
+            
+            #print(f"new q id list: {new_q_id_list}")
+            
+        # User pressed "submit" button
+        elif request.POST.get("submit"):
+            
+            print("submit")
+                
+            # Move on to next page
+            return HttpResponseRedirect('/rechner/result')
+    
+        # User did something stupid
+        else:
+            print('no field added')
+            print("useless")
+            print(request.POST.getlist("new_field"))
+            
         
     # First Request of this page (Blank, unbinded Page, if so with default values)
-    else:
-        # init list for potential new fields
-        new_q_id_list = []
+    elif (request.method == "GET"):
         print("first")
-        print(new_q_id_list)
-        request.session['new_q_id_list'] = new_q_id_list
-    
-    # Get categories
-    categories = Category.objects.all()
-    
-    # get new question list form ids
+        # reset added questions and user input
+        request.session['new_q_id_list'] = []
+        request.session['user_input_new_q'] = []
+        request.session['user_input'] = []
+
+## Handle User Input
+    # get new question and default list from new question id's
     new_q_list = []
-    for id in new_q_id_list:
+    for id in request.session['new_q_id_list']:
         new_q_list.append(Question.objects.get(pk=id))
+
     
-    # Get all (not yet existing question as list:
+    # Get all (not yet existing) new questions as list:
     q_list = [None]*Question.objects.all().count()
     for i,q in enumerate(Question.objects.all()):
         if q not in questions and q not in new_q_list:  
-            q_list[i] =q
+            q_list[i] =q  
             
+    # Get answer to new questions
+    new_d_list = request.session['user_input_new_q'] 
        
     # Create context
     context = {
@@ -157,9 +183,8 @@ def fill_event_template(request, template_id):
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Event: {event_template.name}",
         'button_link':'/rechner',
-        'categories':categories,
         'q_list':q_list,
-        'new_q_list':new_q_list,
+        'new_q_d_list':np.array([new_q_list,new_d_list]).T.tolist(),
     }
     
     # Render Form
