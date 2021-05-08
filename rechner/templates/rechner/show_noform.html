@@ -21,7 +21,12 @@
 <!--          List questions -->
                 <tr>
                     <td>Question {{forloop.counter}}: {{q.question_text }}</td>
-                    <td> <input id="id_subject" type="text" name={{q.id}} maxlength="100" required value={{d}}> </td>
+                    <td> 
+                        <input id="id_subject" type="text" name={{q.id}} maxlength="100" required value={{d}}> 
+                    </td>
+                    <td>
+                        <button type='submit' name="remove_field" value={{q.id}}>-</button>
+                    </td>
                 </tr>
                 
                 

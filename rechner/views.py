@@ -104,12 +104,12 @@ def fill_event_template(request, template_id):
             data[i,C.iV] = request.POST.get(str(int(q)))
             
         # Read added fields
-        if (request.POST.get('add_field') != None):
+        if request.POST.get('add_field') != None:
             added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
                 
             # User did add field
             print(request.POST.get('add_cat'))
-            if (added_field_qid >= 0):    
+            if added_field_qid >= 0:    
                 print(f"field added. With question {added_field_qid}")
                 row = np.zeros(data[0].shape)
                 row[C.iQ] = added_field_qid
@@ -125,7 +125,7 @@ def fill_event_template(request, template_id):
                 data = H.get_first_and_last(data)
             
         # Read added Category
-        if (request.POST.get('add_cat')!=None):
+        if request.POST.get('add_cat')!=None:
             added_cat_id = max(list(map(float,request.POST.getlist("new_cat"))))
             if (added_cat_id >= 0):    
                 added_cat = get_object_or_404(Category,pk=added_cat_id)
@@ -137,6 +137,16 @@ def fill_event_template(request, template_id):
             added_cat = None
             new_c_q_list = None
             
+            
+        # Read deleted field and delete it
+        if request.POST.get('remove_field')!=None:
+            data = np.delete(data, obj=np.argwhere(data[:,C.iQ]==float(request.POST.get('remove_field'))),axis=0)
+            print("deleting Q ",request.POST.get('remove_field'))
+            print(data)
+            # Update first and last bools
+            data = H.get_first_and_last(data)
+        
+        
         ## Process User input 
         
         # User pressed "submit" button
