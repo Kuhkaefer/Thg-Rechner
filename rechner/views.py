@@ -47,19 +47,12 @@ def result(request):
     event_template = request.session['event_template']
     
     # Array with users answers to questions of event template
-    answers = request.session["user_input"]
-    
-    #  Array with new IDs of questions added by user
-    new_q_id_list = request.session['new_q_id_list'] 
-    
-    # Array with users answers to new (added) questions
-    answers_new_q = request.session["user_input_new_q"]
-    
+    user_data = np.array(request.session["user_data"])
     
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
-        'page_description': f'discombobulated combobulator. { [request.session["user_input"],request.session["user_input_new_q"]] }'
+        'page_description': f'discombobulated combobulator.\n {user_data[:,C.iV]}'
         }
     
     return render(request, 'rechner/simple_page.html', context)
@@ -93,6 +86,10 @@ def fill_event_template(request, template_id):
         
         # get first and last bools
         data = H.get_first_and_last(data)
+        
+        # Non relevant quantites
+        added_cat = None
+        new_c_q_list = None
 
         
     ## Later Call
@@ -102,30 +99,43 @@ def fill_event_template(request, template_id):
         
         ## Read user input
         
-        # Read added fields
-        added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
-
-        # User did add field
-        if added_field_qid >= 0:    
-            print(f"field added. With question {added_field_qid}")
-            row = np.zeros(data[0].shape)
-            row[C.iQ] = added_field_qid
-            row[C.iC] = get_object_or_404(Question, pk=added_field_qid).pk
-            row[C.iO] = np.max(data[:,C.iO])+1
-            data = np.vstack([data,row])
-            
-            # Sort data again
-            idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
-            data = data[idx]
-            
-            # Update first and last bools
-            data = H.get_first_and_last(data)
-            
-        
         # Read entered values
         for i,q in enumerate(data[:,C.iQ]):
-            data[i,C.iV] = request.POST.get(str(q.pk))
+            data[i,C.iV] = request.POST.get(str(int(q)))
             
+        # Read added fields
+        if (request.POST.get('add_field') != None):
+            added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
+                
+            # User did add field
+            print(request.POST.get('add_cat'))
+            if (added_field_qid >= 0):    
+                print(f"field added. With question {added_field_qid}")
+                row = np.zeros(data[0].shape)
+                row[C.iQ] = added_field_qid
+                row[C.iC] = get_object_or_404(Question, pk=added_field_qid).category.pk
+                row[C.iO] = np.max(data[:,C.iO])+1
+                data = np.vstack([data,row])
+                
+                # Sort data again
+                idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
+                data = data[idx]
+                
+                # Update first and last bools
+                data = H.get_first_and_last(data)
+            
+        # Read added Category
+        if (request.POST.get('add_cat')!=None):
+            added_cat_id = max(list(map(float,request.POST.getlist("new_cat"))))
+            if (added_cat_id >= 0):    
+                added_cat = get_object_or_404(Category,pk=added_cat_id)
+                new_c_q_list = Question.objects.filter(category = added_cat)
+            else:
+                added_cat = None
+                new_c_q_list = None
+        else:
+            added_cat = None
+            new_c_q_list = None
             
         ## Process User input 
         
@@ -133,7 +143,7 @@ def fill_event_template(request, template_id):
         if request.POST.get("submit"):
             
             # save entered values
-            request.session['user_data'] = dataa.tolist()
+            request.session['user_data'] = data.tolist()
                 
             # Move on to next page
             return HttpResponseRedirect('/rechner/result')
@@ -153,20 +163,29 @@ def fill_event_template(request, template_id):
     print(data)
         
     
-    # Create context
+    ## Create context
     
+    # Get model objects from IDs in numpy array
     q_list = []
     for qid in data[:,C.iQ]:
         q_list.append(get_object_or_404(Question, pk=qid))
-        print(qid)
-        print(get_object_or_404(Question, pk=qid).question_text)
+        
+    misscats_list = []
+    for mcid in missing_cats:
+        misscats_list.append(get_object_or_404(Category, pk=mcid))
+        
+    missqs_list = []
+    for mqid in missing_qs:
+        missqs_list.append(get_object_or_404(Question, pk=mqid))
     
-    print(q_list)
+    # create context dict
     context = {
         'template_instance':event_template,
         'q_v_f_and_l':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL]),
-        'missing_qs':missing_qs,
-        'missing_cats': missing_cats,
+        'missing_qs':missqs_list,
+        'missing_cats': misscats_list,
+        'cat_added':added_cat,
+        'new_c_q_list':new_c_q_list,
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Event: {event_template.name}",
         'button_link':'/rechner',
