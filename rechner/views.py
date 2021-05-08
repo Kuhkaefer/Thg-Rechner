@@ -66,11 +66,20 @@ def fill_event_template(request, template_id):
     # event template
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
     
+    # submitting ok?
+    can_submit = True
+    reset      = False
     
+    
+    ## Resetting
+    print(request.POST.get('reset'))
+    if (request.method == "POST") & (request.POST.get('reset')=='Reset'):
+        reset = True
+        print("reset")
     ## First Call
-    if request.method == "GET":
+    if (request.method == "GET") or reset:
         ## Initialize values
-
+        print("first")
         # template questions list and defaults as values list
         def_amnts = event_template.defaultamounts_set.all()
         data  = np.zeros((len(def_amnts), C.columns))
@@ -101,16 +110,21 @@ def fill_event_template(request, template_id):
         
         # Read entered values
         for i,q in enumerate(data[:,C.iQ]):
-            data[i,C.iV] = request.POST.get(str(int(q)))
+            ui = request.POST.get(str(int(q)))
+            
+            #try float(ui): 
+            try:
+                data[i,C.iV] = ui
+            except:
+                data[i,C.iV] = 0
+                can_submit=False
             
         # Read added fields
         if request.POST.get('add_field') != None:
             added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
                 
             # User did add field
-            print(request.POST.get('add_cat'))
             if added_field_qid >= 0:    
-                print(f"field added. With question {added_field_qid}")
                 row = np.zeros(data[0].shape)
                 row[C.iQ] = added_field_qid
                 row[C.iC] = get_object_or_404(Question, pk=added_field_qid).category.pk
@@ -137,12 +151,10 @@ def fill_event_template(request, template_id):
             added_cat = None
             new_c_q_list = None
             
-            
         # Read deleted field and delete it
         if request.POST.get('remove_field')!=None:
             data = np.delete(data, obj=np.argwhere(data[:,C.iQ]==float(request.POST.get('remove_field'))),axis=0)
-            print("deleting Q ",request.POST.get('remove_field'))
-            print(data)
+            
             # Update first and last bools
             data = H.get_first_and_last(data)
         
@@ -154,9 +166,12 @@ def fill_event_template(request, template_id):
             
             # save entered values
             request.session['user_data'] = data.tolist()
-                
-            # Move on to next page
-            return HttpResponseRedirect('/rechner/result')
+            
+            if can_submit:
+                # Move on to next page
+                return HttpResponseRedirect('/rechner/result')
+            else:
+                pass
     
     
     ## Always
