@@ -11,10 +11,9 @@ from rechner.forms import FillEvent
 def index(request):
     page_text = f"Choose an event template"
     
-    # Check choice, If button clicked (I think)
+    # Check template choice, If button clicked (I think)
     if request.method == "POST":
        choice= request.POST.get('chosen_template')
-       print(len(choice))
        if choice == "":
            choice = "/rechner"
            print(choice)
@@ -56,7 +55,6 @@ def fill_event_template(request, template_id):
     
 ## Helper functions
     def save_user_input(request, defaults,new_d_list,new_q_id_list):  
-        
         #print(f"keys: {request.POST.keys()}")
         #print(f"4: {request.POST.get('4')}")
         
@@ -198,4 +196,4 @@ def fill_event_template(request, template_id):
     }
     
     # Render Form
-    return render(request, 'rechner/show_simple_form.html', context)
+    return render(request, 'rechner/show_noform.html', context)
