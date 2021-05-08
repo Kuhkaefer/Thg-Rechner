@@ -42,6 +42,20 @@ def index(request):
 
 ## Ergebnis Seite
 def result(request):
+    
+    # Chosen Event-Template
+    event_template = request.session['event_template']
+    
+    # Array with users answers to questions of event template
+    answers = request.session["user_input"]
+    
+    #  Array with new IDs of questions added by user
+    new_q_id_list = request.session['new_q_id_list'] 
+    
+    # Array with users answers to new (added) questions
+    answers_new_q = request.session["user_input_new_q"]
+    
+    
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
@@ -82,6 +96,7 @@ def fill_event_template(request, template_id):
 ## Preparation
     # Get chosen Template and related questions
     event_template = get_object_or_404(EventTemplate, pk=template_id) 
+    request.session['event_template'] = event_template.pk
     dfs = event_template.defaultamounts_set.all()
     questions = []
     for df in dfs:
