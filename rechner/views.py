@@ -97,16 +97,25 @@ def fill_event_template(request, template_id):
     old_cat = ""
     first_in_cat = np.zeros(len(questions), dtype=bool)
     last_in_cat = np.zeros(len(questions), dtype=bool)
+    existing_cats = []
     for i,q in enumerate(questions):
         defaults.append(dfs.get(question=q).value)
         # mark first question of category
         if old_cat != q.category:
+            existing_cats.append(q.category)
             first_in_cat[i] = True
             # mark last question of category
             if i>0:
                 last_in_cat[i-1] = True
             old_cat = q.category
     last_in_cat[i] = True
+    
+    # get missing categories
+    all_cats = Category.objects.all()
+    missing_cats = []
+    for c in all_cats:
+        if c not in existing_cats:
+            missing_cats.append(c)
     
             
 ## Check user input            
@@ -185,6 +194,7 @@ def fill_event_template(request, template_id):
         'button_link':'/rechner',
         'q_list':q_list,
         'new_q_d_list':np.array([new_q_list,new_d_list]).T.tolist(),
+        'missing_cats': missing_cats,
     }
     
     # Render Form

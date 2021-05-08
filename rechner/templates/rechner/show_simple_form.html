@@ -69,6 +69,32 @@
                 {% endif %}
                 
             {% endfor %}
+            <tr><td><br></td></tr>
+            
+<!--      Option to add question of new category -->
+            <tr> 
+                <td> Posten neuer Kategorie: </td>
+                <td> 
+                    <select name="chosen_cat">
+                        <option value="-1"> Choose... </option>
+                        {% for mc in missing_cats %}
+                            <option value={{mc.id}} > {{ mc.name }} </option> 
+                        {% endfor %}    
+                        <input type='submit' name="add_cat" value="+" >
+                    </select>
+                </td>
+                <td> 
+                    {% if new_cat != None %}
+                    <select name="new_cat_q">
+                        <option value="-1"> Choose... </option>
+                        {% for mc in new_c_q_list %}
+                            <option value={{mc.id}} > {{ mc.name }} </option> 
+                        {% endfor %}    
+                        <input type='submit' name="add_cat" value="+" >
+                    </select>
+                    {% endif %}
+                </td>
+            </tr>
         </table>
         <br>
         
