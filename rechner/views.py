@@ -167,6 +167,20 @@ def fill_event_template(request, template_id):
         
         ## Process User input 
         
+        # User pressed enter key
+        if request.POST.get("enter"):
+            print("enter")
+            
+            # save entered values
+            request.session['user_data'] = data.tolist()
+            
+            if can_submit:
+                # Move on to next page
+                return HttpResponseRedirect('/rechner/result')
+            else:
+                pass
+        
+        
         # User pressed "submit" button
         if request.POST.get("submit form"):
             print("submit")
