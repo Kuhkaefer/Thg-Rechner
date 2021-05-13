@@ -25,7 +25,8 @@
                         <input id="id_subject" type="text" name={{q.id}} maxlength="100" required value={{d}}> 
                     </td>
                     <td>
-                        <button type='submit' name="remove_field" value={{q.id}}>-</button>
+                            <button type='submit' name="enter" value=1 hidden="hidden">-</button>
+                            <button type='submit' name="remove_field" value={{q.id}}>-</button>
                     </td>
                 </tr>
                 
@@ -109,7 +110,7 @@
 <!--  Submit buttons -->
         <table>
             <tr>
-                <td> <input type="submit" name="submit" value="Submit"> </td>
+                <td> <input type="submit" name="submit form" value="Submit"> </td>
                 <td> <input type="submit" name="reset" value="Reset"> </td>
                 <td> <input type='button'  name="back" value="Back" onclick="location.href='{{button_link}}'"> </td>
             </tr>
