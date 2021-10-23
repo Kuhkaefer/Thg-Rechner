@@ -11,7 +11,7 @@ from rechner.forms import FillEvent
 
 ## Index Seite
 def index(request):
-    page_text = f"Choose an event template"
+    page_text = f"Wähle ein Veranstaltungsformat als Vorlage:"
     
     # Check template choice, If button clicked (I think)
     if request.method == "POST":
@@ -35,7 +35,7 @@ def index(request):
         'page_text':page_text,
         'event_templates':EventTemplate.objects.all(),
         'button_link':'/rechner',
-        'button_text':'Go!'
+        'button_text':'Los!'
         }
     
     # render context into page
@@ -233,7 +233,8 @@ def fill_event_template(request, template_id):
         'cat_added':added_cat,
         'new_c_q_list':new_c_q_list,
         'page_name':f"CO2 bei {event_template.name}",
-        'page_header':f"Event: {event_template.name}",
+        'page_header':f"Veranstaltung: {event_template.name}",
+        'page_description':'Bitte trage die Menge der verschiedenen Posten ein:',
         'button_link':'/rechner',
     }
     

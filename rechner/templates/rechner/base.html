@@ -1,10 +1,17 @@
+
+
+
 <html>
 
 
-
 <head>
-
     <style type="text/css">
+        :root {
+                --jdpg_blue: rgb(0,81,157);
+                --jdpg_green: rgb(233,233,0);
+            }
+
+
         .sidenav {
                 height:100%;
                 width:160px;
@@ -12,7 +19,7 @@
                 z-index:1;
                 top:0;
                 left:0;
-                background-color:#111;
+                background-color: var(--jdpg_blue);
                 overflow-x: :hidden;
                 padding-top:20px;
             }
@@ -21,7 +28,7 @@
                 padding:14px 8px 6px 16px;
                 text-decoration: none;
                 font-size:20px;
-                color: #818181;
+                color: var(--jdpg_green);
                 display:block;
             }
     
@@ -34,6 +41,16 @@
                 margin-top:35px;
                 padding: 0px 10px;
             }
+        .button {
+                background-color: #4CAF50; /* Green */
+                border: none;
+                color: white;
+                padding: 15px 32px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+            }
         p {
             font-family : "Arial"
             }
@@ -42,6 +59,13 @@
             }
         div {
             font-family : "Arial"
+        }
+        hr {
+            color: var(--jdpg_green);
+            height: 0px;
+            width: 75%;
+            border: solid 2px;
+            margin-left: 0;
         }
     </style>
     
@@ -59,6 +83,9 @@
     </div>
     <div id="content", name="content", class="main">
         <h2>{% block header %} {% endblock %} </h1>
+        <hr >
+        {% block description %}
+        {% endblock %}
         {% block content %}
         {% endblock %}
         {% block button %}

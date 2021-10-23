@@ -5,8 +5,8 @@ from django.http import HttpResponse
 def home(request):
     context = {
         'page_name':'Klimarina',
-        'page_header':'Home',
-        'page_description':'Look around. Nice and homely here. Soothing. Welcome.',
+        'page_header':'Klimarina - CO2 Rechner für die jDPG',
+        'page_description':'Berechne die CO2-Emissionen, die für deine jDPG-Veranstaltung anfallen:',
         'button_link':'rechner',
         'button_text':'Zum Rechner'
         }
