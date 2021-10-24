@@ -12,3 +12,13 @@ def home(request):
         }
     
     return render(request, 'rechner/simple_page.html', context)
+
+
+def info(request):
+    context = {
+        'page_name':'Klimarina - Info',
+        'page_header':'Info',
+        'page_description':'Über uns',
+        }
+    
+    return render(request, 'rechner/simple_page.html', context)

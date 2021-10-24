@@ -9,6 +9,9 @@
         :root {
                 --jdpg_blue: rgb(0,81,157);
                 --jdpg_green: rgb(233,233,0);
+                --green: #4CAF50;
+                --red: #E52D2D;
+                --orange: #FF9100;
             }
 
 
@@ -42,15 +45,89 @@
                 padding: 0px 10px;
             }
         .button {
-                background-color: #4CAF50; /* Green */
+                transition-duration: 0.4s;
+                background-color: white; /* Filling. Green */
                 border: none;
-                color: white;
-                padding: 15px 32px;
+                color: black; /* All */
+                padding: 10px 20px;
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
                 font-size: 16px;
+                margin: 4px 2px;
+                cursor: pointer;
+                border-color: var(--green);
             }
+        .green_button {
+            background-color: white; /* Filling */
+            color: black; /* All */
+            border: 2px solid var(--green);
+            border-color: var(--green);
+        }
+        .green_button:hover {
+            background-color: var(--green);
+        }
+        .red_button {
+            background-color: white; /* Filling */
+            color: black; /* All */
+            border: 2px solid var(--red);
+            border-color: var(--red);
+        }
+        .red_button:hover {
+            background-color: var(--red);
+        }
+        .orange_button {
+            background-color: white; /* Filling */
+            color: black; /* All */
+            border: 2px solid var(--orange);
+            border-color: var(--orange);
+        }
+        .orange_button:hover {
+            background-color: var(--orange);
+        }
+        .del_button {
+            background-color: white; /* Filling */
+            color: var(--red); /* All */
+            border: 1px solid var(--red);
+            border-color: var(--red);
+            border-radius: 3px;
+            padding: 1px 5px;
+        }
+        .del_button:hover {
+            background-color: var(--red);
+            color: white; /* All */
+        }
+        .add_button {
+            background-color: white; /* Filling */
+            color: var(--green); /* All */
+            border: 1px solid var(--green);
+            border-color: var(--green);
+            border-radius: 3px;
+            padding: 1px 4px;
+        }
+        .add_button:hover {
+            background-color: var(--green);
+            color: white; /* All */
+        }
+    
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: grey;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            padding: 1px 5px;
+            z-index: 1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
         p {
             font-family : "Arial"
             }
@@ -80,6 +157,7 @@
     <div class="sidenav">
         <a href="/">Home</a>
         <a href="/rechner">Rechner</a>
+        <a href="/info">Info</a>
     </div>
     <div id="content", name="content", class="main">
         <h2>{% block header %} {% endblock %} </h1>
