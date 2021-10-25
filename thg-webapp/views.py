@@ -15,10 +15,14 @@ def home(request):
 
 
 def info(request):
+    
+    content = "Klimarina ist ein Projekt des Arbeitsteams 'Nachhaltigkeit' der jungen Deutschen Physikalischen Gesellschaft (jDPG)"
+    
     context = {
         'page_name':'Klimarina - Info',
         'page_header':'Info',
-        'page_description':'Über uns',
+        'page_description':'Über das Projekt, über uns und überhaupt',
+        'page_content':content,
         }
     
     return render(request, 'rechner/simple_page.html', context)
