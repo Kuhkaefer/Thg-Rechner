@@ -53,12 +53,28 @@ class Question(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name',
                                  default='Unsortiert')  # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
 
+    # Link to emission(s)
+    emissions = models.…(Emission)
+    
+    # multiply with n_ppl or not
+    multiply_by_ppl = models.BooleanField()
+    
+    # Calculation
+    def calc(self, value, n_ppl=1):
+        emission_sum = 0
+        for e in emissions:
+            emission_sum += e.emission * value
+        if self.multiply_by_ppl:
+            emission_sum *= n_ppl
+        return emission_sum
+        
+
     # Representation
     def __str__(self):
         return self.question_text
     
 
-# Berechnung
+# Berechnung (???)
 class Calculation(models.Model):
     # Question for which the calculation is
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -72,6 +88,22 @@ class Calculation(models.Model):
     # Representation
     def __str__(self):
         return self.question.question_text + " " + self.emission.name
+    
+# Berechnungsmethode
+def CalculationMethod(models.Model):
+    
+    # Name of Method
+    name = models.CharField(max_length=100, unique=True)
+    # eg "fixed" or "per participant"
+    
+    # Function
+    calc = models.CharField(max_length=50)
+    # eg "value*n_ppl" or "value"
+    
+    # Representation
+    def __str__(self):
+        return self.name
+
 
 # Templates for Event Types
 class EventTemplate(models.Model):
