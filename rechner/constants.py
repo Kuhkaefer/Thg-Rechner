@@ -1,10 +1,10 @@
+## Constants
 
-
-
-iQ = 0
-iC = 1
-iV = 2
-iF = 3
-iL = 4
-iO = 5
+# Indices of data array
+iQ = 0 # question ID
+iC = 1 # category ID
+iV = 2 # value (default → user)
+iF = 3 # first of category
+iL = 4 # last of category
+iO = 5 # order
 columns = 6

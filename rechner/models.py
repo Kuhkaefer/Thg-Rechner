@@ -21,7 +21,16 @@ class Source(models.Model):
 
     # Author
 
+    # URL
+
     # Year
+
+    # Explanation
+    expl = models.CharField(max_length=2000)
+
+    # Representation
+    def __str__(self):
+        return self.name
 
 
 # emission data
@@ -78,38 +87,6 @@ class Question(models.Model):
     # Representation
     def __str__(self):
         return self.question_text
-
-
-#Berechnung (???)
-class Calculation(models.Model):
-    #Question for which the calculation is
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-
-    #Link to emission data
-    emission = models.ForeignKey(Emission, on_delete=models.CASCADE)
-
-    #Relation between answer and Emission data (calculation not in models)
-    ratio = models.DecimalField(max_digits=10, decimal_places=5)
-
-    #Representation
-    def __str__(self):
-        return self.question.question_text + " " + self.emission.name
-
-#Berechnungsmethode
-#def CalculationMethod(models.Model):
-
-    #Name of Method
-    #name = models.CharField(max_length=100, unique=True)
-    #eg "fixed" or "per participant"
-
-    #Function
-    #calc = models.CharField(max_length=50)
-    #eg "value*n_ppl" or "value"
-
-    #Representation
-    #def __str__(self):
-        #return self.name
-
 
 # Templates for Event Types
 class EventTemplate(models.Model):

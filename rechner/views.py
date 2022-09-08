@@ -1,5 +1,4 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from django.forms import inlineformset_factory
 from .models import EventTemplate, Question, DefaultAmounts, Category
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -10,8 +9,6 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from rechner import helpers as H
 from rechner import constants as C
-
-from rechner.forms import FillEvent
 
 ## Index Seite
 def index(request):
@@ -58,6 +55,7 @@ def result(request):
     # Preparation
     sum_per_e = 0
     sum_per_c_dict = {}
+    any_e_per_c = 0
 
     # Loop through questions
     for entry in user_data:
@@ -70,6 +68,7 @@ def result(request):
         # reset emission per category
         if entry[C.iF]:
             sum_per_c = 0
+            any_e_per_c = 0
 
         # emission per question
         sum_per_q = 0
@@ -80,9 +79,11 @@ def result(request):
         # add to emission per category
         sum_per_c += sum_per_q
 
-        # total emission per category
-        if entry[C.iL]:
-            sum_per_c_dict[category.name] = sum_per_c
+        # total emission per category (skip categories without related emissions)
+        if (len(question.emissions.all())>0):
+            any_e_per_c += 1
+        if entry[C.iL] and (any_e_per_c>0):
+            sum_per_c_dict[category.name] = [sum_per_c]
 
         # add to emission per event
         sum_per_e += sum_per_q
@@ -96,7 +97,7 @@ def result(request):
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
         'page_description': f'discombobulated combobulator.\n {user_data[:,C.iV]}',
-        'page_content' : f'Total emissions: {sum_per_e} Mio t CO2eq.',
+        'page_content' : f'{sum_per_c_dict}\nTotal emissions: {sum_per_e} Mio t CO2eq.',
         }
 
     return render(request, 'rechner/simple_page.html', context)
