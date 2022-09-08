@@ -16,10 +16,10 @@ class EmissionAdmin(admin.ModelAdmin):
     # list_display = ['name', 'emission']
     fieldsets = (
         (None, {
-            'fields': ('name', 'emission')
+            'fields': ('name', 'value')
         }),
     )
-    search_fields = ['name', 'emission']
+    search_fields = ['name', 'value']
     # list_filter = []
 
 
@@ -39,4 +39,3 @@ class DefaultAmountsInline(admin.TabularInline):
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):
     inlines = [DefaultAmountsInline]
-

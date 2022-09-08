@@ -30,7 +30,7 @@ class Emission(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     # Emission per kg
-    emission = models.DecimalField(max_digits=10, decimal_places=5)
+    value = models.DecimalField(max_digits=10, decimal_places=5)
 
     # source
     source = models.ManyToManyField(Source)
@@ -41,14 +41,14 @@ class Emission(models.Model):
 
 
 
-# Question 
+# Question
 class Question(models.Model):
     # short name
     name = models.CharField(max_length=100)
 
     # Text of question
     question_text = models.CharField(max_length=200)
-    
+
     # Infotext
     info_text = models.CharField(max_length=1000, default="")
 
@@ -58,10 +58,10 @@ class Question(models.Model):
 
     # Link to emission(s)
     emissions = models.ManyToManyField(Emission)
-    
+
     # multiply with n_ppl or not
     multiply_by_ppl = models.BooleanField(default=False)
-    
+
     # Calculate emissions with user input (value)
     def calc(self, value, n_ppl=1):
         emission_sum = 0
@@ -74,11 +74,11 @@ class Question(models.Model):
             emission_sum *= n_ppl
         # return result
         return emission_sum
-        
+
     # Representation
     def __str__(self):
         return self.question_text
-    
+
 
 #Berechnung (???)
 class Calculation(models.Model):
@@ -94,18 +94,18 @@ class Calculation(models.Model):
     #Representation
     def __str__(self):
         return self.question.question_text + " " + self.emission.name
-    
+
 #Berechnungsmethode
 #def CalculationMethod(models.Model):
-    
+
     #Name of Method
     #name = models.CharField(max_length=100, unique=True)
     #eg "fixed" or "per participant"
-    
+
     #Function
     #calc = models.CharField(max_length=50)
     #eg "value*n_ppl" or "value"
-    
+
     #Representation
     #def __str__(self):
         #return self.name
@@ -118,7 +118,7 @@ class EventTemplate(models.Model):
 
     # Short name of event type for url display
     shorty = models.CharField(max_length=15, unique=True)
-    
+
     # Representation
     def __str__(self):
         return self.name
