@@ -14,10 +14,10 @@ class SourceAdminInline(admin.TabularInline):
 class EmissionAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            'fields': ('name', 'value', 'source')
+            'fields': ('name', 'value', 'source', 'unit')
         }),
     )
-    search_fields = ['name', 'value', 'source']
+    search_fields = ['name', 'value', 'source', 'unit']
 
 
 

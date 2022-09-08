@@ -26,7 +26,7 @@ class Source(models.Model):
     # Year
 
     # Explanation
-    expl = models.CharField(max_length=2000)
+    expl = models.CharField(max_length=2000, blank=True)
 
     # Representation
     def __str__(self):
@@ -38,11 +38,14 @@ class Emission(models.Model):
     # Name of product
     name = models.CharField(max_length=50, unique=True)
 
-    # Emission per kg
+    # Emission in kg per amount
     value = models.DecimalField(max_digits=10, decimal_places=5)
 
+    # unit (kg per what? Should be identical to related Question.unit)
+    unit = models.CharField(max_length=20, blank=True)
+
     # source
-    source = models.ManyToManyField(Source)
+    source = models.ManyToManyField(Source, blank=True)
 
     # Representation
     def __str__(self):
@@ -59,14 +62,17 @@ class Question(models.Model):
     question_text = models.CharField(max_length=200)
 
     # Infotext
-    info_text = models.CharField(max_length=1000, default="")
+    info_text = models.CharField(max_length=1000, default="", blank=True)
 
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name',
                                  default='Unsortiert')  # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
 
+    # Unit
+    unit = models.CharField(max_length=20, blank=True)
+
     # Link to emission(s)
-    emissions = models.ManyToManyField(Emission)
+    emissions = models.ManyToManyField(Emission, blank=True)
 
     # multiply with n_ppl or not
     multiply_by_ppl = models.BooleanField(default=False)

@@ -65,6 +65,7 @@ def result(request):
         category = get_object_or_404(Category, pk=entry[C.iC])
         user_value = entry[C.iV]
 
+
         # reset emission per category
         if entry[C.iF]:
             sum_per_c = 0
@@ -73,6 +74,9 @@ def result(request):
         # emission per question
         sum_per_q = 0
         for emi in question.emissions.all():
+            # Check units
+            if question.unit != emi.unit:
+                raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
             sum_per_q += float(emi.value)
         sum_per_q *= user_value
 
@@ -283,4 +287,4 @@ def fill_event_template(request, template_id):
     }
 
     # Render Form
-    return render(request, 'rechner/show_noform.html', context)
+    return render(request, 'rechner/fill_eventtemplate.html', context)
