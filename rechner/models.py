@@ -50,7 +50,7 @@ class Question(models.Model):
     question_text = models.CharField(max_length=200)
     
     # Infotext
-    info_text = models.CharField(max_length=1000)
+    info_text = models.CharField(max_length=1000, default="")
 
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name',
@@ -60,7 +60,7 @@ class Question(models.Model):
     emissions = models.ManyToManyField(Emission)
     
     # multiply with n_ppl or not
-    multiply_by_ppl = models.BooleanField()
+    multiply_by_ppl = models.BooleanField(default=False)
     
     # Calculate emissions with user input (value)
     def calc(self, value, n_ppl=1):

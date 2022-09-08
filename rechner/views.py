@@ -15,7 +15,7 @@ def index(request):
     
     # Check template choice, If button clicked (I think)
     if request.method == "POST":
-       choice= request.POST.get('chosen_template')
+       choice = request.POST.get('chosen_template')
        if choice == "":
            choice = "/rechner"
            print(choice)
@@ -60,7 +60,6 @@ def result(request):
 
 ## Abfrage-Seite
 def fill_event_template(request, template_id):
-    
     ## Always 1 
     
     # event template
