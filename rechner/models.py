@@ -48,61 +48,67 @@ class Question(models.Model):
 
     # Text of question
     question_text = models.CharField(max_length=200)
+    
+    # Infotext
+    info_text = models.CharField(max_length=1000)
 
     # Link to category
     category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name',
                                  default='Unsortiert')  # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
 
     # Link to emission(s)
-    emissions = models.…(Emission)
+    emissions = models.ManyToManyField(Emission)
     
     # multiply with n_ppl or not
     multiply_by_ppl = models.BooleanField()
     
-    # Calculation
+    # Calculate emissions with user input (value)
     def calc(self, value, n_ppl=1):
         emission_sum = 0
+        # Loop through related emissions
         for e in emissions:
+            # sum up and multiply with user entry
             emission_sum += e.emission * value
+        # multply with number of participants
         if self.multiply_by_ppl:
             emission_sum *= n_ppl
+        # return result
         return emission_sum
         
-
     # Representation
     def __str__(self):
         return self.question_text
     
 
-# Berechnung (???)
+#Berechnung (???)
 class Calculation(models.Model):
-    # Question for which the calculation is
+    #Question for which the calculation is
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
-    # Link to emission data
+    #Link to emission data
     emission = models.ForeignKey(Emission, on_delete=models.CASCADE)
 
-    # Relation between answer and Emission data (calculation not in models)
+    #Relation between answer and Emission data (calculation not in models)
     ratio = models.DecimalField(max_digits=10, decimal_places=5)
 
-    # Representation
+    #Representation
     def __str__(self):
         return self.question.question_text + " " + self.emission.name
     
-# Berechnungsmethode
-def CalculationMethod(models.Model):
+#Berechnungsmethode
+#def CalculationMethod(models.Model):
     
-    # Name of Method
-    name = models.CharField(max_length=100, unique=True)
-    # eg "fixed" or "per participant"
+    #Name of Method
+    #name = models.CharField(max_length=100, unique=True)
+    #eg "fixed" or "per participant"
     
-    # Function
-    calc = models.CharField(max_length=50)
-    # eg "value*n_ppl" or "value"
+    #Function
+    #calc = models.CharField(max_length=50)
+    #eg "value*n_ppl" or "value"
     
-    # Representation
-    def __str__(self):
-        return self.name
+    #Representation
+    #def __str__(self):
+        #return self.name
 
 
 # Templates for Event Types
