@@ -4,7 +4,7 @@
 {{ page_name }}
 {% endblock %}
 
-{% block header %} 
+{% block header %}
     {{ page_header }}
 {% endblock %}
 
@@ -32,18 +32,18 @@
             <tr> </tr>
             <tr> </tr>
             <tr> </tr>
-            {% for q,d,first,last in q_v_f_and_l %}
-            
+            {% for q,d,first,last,has_unit in q_v_f_l_and_u %}
+
 <!--          Show category -->
                 {% if first %}
-                    <tr>  <th> <br> {{q.category}}  </th> </tr>
+                    <tr style="float:left">  <th> <br> {{q.category}}  </th> </tr>
                 {% endif %}
-                
+
 <!--          List questions -->
                 <tr>
-                    <td>Frage {{forloop.counter}}: {{q.question_text }}</td>
-                    <td> 
-                        <input id="id_subject" type="text" name={{q.id}} maxlength="100" size="40" required value={{d}}> 
+                    <td>{{forloop.counter}}. {{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %}</td>
+                    <td>
+                        <input id="id_subject" type="text" name={{q.id}} maxlength="20" size="6" required value={{d}} style="direction: rtl;float:right;">
                     </td>
                     <td>
                             <button type='submit' name="enter" value=1 hidden="hidden">-</button>
@@ -54,18 +54,18 @@
                             <div class = "hide"> BUH! </div>
                     </td>
                 </tr>
-                
-                
+
+
 <!--                <tr> <td>for so probieren</td></tr>
                 {% for new_qd in new_q_d_listlist %}
                 <tr> <td>{{new_qd.0}}</td></tr>
                 {% empty %}
                 <tr> <td>for so empty</td></tr>
-                
+
                 {% endfor %}
                     -->
-                
-                
+
+
 <!--          Show added questions -->
 <!--                {% if last %}
                     {% for new_qd in new_q_d_list%}
@@ -75,62 +75,55 @@
                                 <td> <input id="id_subject" type="text" name={{new_qd.0.id}} maxlength="100" required value={{new_qd.1}}> </td>
                             </tr>
                         {% endif %}
-                    {% empty %}                    
+                    {% empty %}
                     {% endfor %}
                     <tr> <td>---</td> </tr>-->
-                    
+
 <!--              Option to add question -->
-                    <tr> 
-                        <td> <txt_grey> Posten hinzufügen: </txt_grey> </td>
-                        <td>
-<!--                             <form action="" method="post"> {% csrf_token %} -->
-                                <select name="new_field">
+                    <tr>
+                        <td> <txt_grey> Posten hinzufügen: </txt_grey>
+                                <select name="new_field" >
                                     <div class="dropdown">
-                                        <option value="-1" > ... </option>
-                                        <div class="dropdown-content">
+                                        <option value="-1"> ... </option>
+                                        <div class="dropdown-content" >
                                         {% for add_q in missing_qs %}
                                             {% if add_q.category == q.category %}
-                                                <option value={{add_q.id}}> {{ add_q.name }} </option> 
+                                                <option value={{add_q.id}}> {{ add_q.name }} </option>
                                             {% endif %}
                                         {% endfor %}
                                         </div>
                                     </div>
                                 </select>
-                        </td>
-                        <td>
+
                                 <input type='submit' name="add_field" value="+" class="add_button" >
-<!--                             </form> -->
                         </td>
                     </tr>
-                    
+
                 {% endif %}
-                
+
             {% endfor %}
             <tr><td><br></td></tr>
-            
+
 <!--      Option to add question of new category -->
-            <tr> 
-                <td> Posten neuer Kategorie: </td>
-                <td> 
+            <tr>
+                <td> Posten neuer Kategorie:
                     <select name="new_cat">
                         <option value="-1"> ... </option>
                         {% for mc in missing_cats %}
-                            <option value={{mc.id}} > {{ mc.name }} </option> 
-                        {% endfor %}    
+                            <option value={{mc.id}} > {{ mc.name }} </option>
+                        {% endfor %}
                     </select>
-                </td>
-                <td>
                     <input type='submit' name="add_cat" value="+" class="add_button" >
                 </td>
             {% if cat_added != None %}
-                <tr> 
+                <tr>
                     <td>Neuer Posten aus {{cat_added}}:</td>
                     <td>
                         <select name="new_field">
                             <option value="-1"> ... </option>
                             {% for mc in new_c_q_list %}
-                                <option value={{mc.id}} > {{ mc.name }} </option> 
-                            {% endfor %}    
+                                <option value={{mc.id}} > {{ mc.name }} </option>
+                            {% endfor %}
                             <input type='submit' name="add_field" value="+" class="add_button">
                         </select>
                     </td>
@@ -139,7 +132,7 @@
             </tr>
         </table>
         <br>
-        
+
 <!--  Submit buttons -->
         <table>
             <tr>
@@ -149,8 +142,7 @@
             </tr>
         </table>
     </form>
-    
-    <p> Random Text Skraa sagt der Rabe. Lel </p>
- 
-{% endblock %}
 
+    <p> Random Text Skraa sagt der Rabe. Lel </p>
+
+{% endblock %}
