@@ -137,7 +137,11 @@ def fill_event_template(request, template_id):
             data[i,C.iQ] = df.question.pk
             data[i,C.iV] = df.value
             data[i,C.iC] = df.question.category.pk
+            data[i,C.iU] = False if df.question.unit in ["", " "] else True
             data[i,C.iO] = i
+            print(df.question.name)
+            print(f"-{df.question.unit}-")
+            print(data[i,C.iU])
 
         # sort by category and Order
         idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
@@ -275,7 +279,7 @@ def fill_event_template(request, template_id):
     # create context dict
     context = {
         'template_instance':event_template,
-        'q_v_f_and_l':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL]),
+        'q_v_f_l_and_u':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU]),
         'missing_qs':missqs_list,
         'missing_cats': misscats_list,
         'cat_added':added_cat,
