@@ -7,6 +7,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+from plotly.offline import plot
 from rechner import helpers as H
 from rechner import constants as C
 
@@ -56,6 +57,8 @@ def result(request):
     sum_per_e = 0
     sum_per_c_dict = {}
     any_e_per_c = 0
+    cnames = []
+    cvalues = []
 
     # Loop through questions
     for entry in user_data:
@@ -88,13 +91,19 @@ def result(request):
             any_e_per_c += 1
         if entry[C.iL] and (any_e_per_c>0):
             sum_per_c_dict[category.name] = [sum_per_c]
+            cnames.append(category.name)
+            cvalues.append(sum_per_c)
 
         # add to emission per event
         sum_per_e += sum_per_q
 
-    print(sum_per_e)
-    print(sum_per_c_dict)
-    c_values = pd.DataFrame(sum_per_c_dict)
+    ## Plot result
+    c_results = pd.DataFrame({"x":"Emissionen","category name":cnames, "category values":cvalues})
+    fig = go.Figure(px.bar(c_results, x="x", y="category values", color="category name", text="category name"))
+    plt_div = plot(fig, output_type='div')
+    print(type(plt_div))
+    #plt_div2= '<iframe width="200" height="200" frameborder="0" seamless="seamless" scrolling="no" src='+plt_div+'.embed?width=200&height=200&link=false&showlegend=false></iframe>'
+    #fig.show()
 
 
     context = {
@@ -102,6 +111,7 @@ def result(request):
         'page_header':'CO2 Result',
         'page_description': f'discombobulated combobulator.\n {user_data[:,C.iV]}',
         'page_content' : f'{sum_per_c_dict}\nTotal emissions: {sum_per_e} Mio t CO2eq.',
+        'plt_div':plt_div,
         }
 
     return render(request, 'rechner/simple_page.html', context)
@@ -292,3 +302,6 @@ def fill_event_template(request, template_id):
 
     # Render Form
     return render(request, 'rechner/fill_eventtemplate.html', context)
+
+def base(request):
+    return render(request, 'rechner/base.html',{"page_header":"jo"})

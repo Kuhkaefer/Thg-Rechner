@@ -5,6 +5,9 @@
 
 
 <head>
+
+  {% load static %}
+
     <style type="text/css">
         :root {
                 --jdpg_blue: rgb(0,81,157);
@@ -26,7 +29,7 @@
                 overflow-x: :hidden;
                 padding-top:20px;
             }
-    
+
         .sidenav a {
                 padding:14px 8px 6px 16px;
                 text-decoration: none;
@@ -34,11 +37,11 @@
                 color: var(--jdpg_green);
                 display:block;
             }
-    
+
         .sidenav a:hover{
                 color:#f1f1f1;
-            }	
-    
+            }
+
         .main{
                 margin-left:180px;
                 margin-top:35px;
@@ -109,7 +112,7 @@
             background-color: var(--green);
             color: white; /* All */
         }
-    
+
         .dropdown {
             position: relative;
             display: inline-block;
@@ -145,11 +148,11 @@
             margin-left: 0;
         }
     </style>
-    
+
     <title>
         {% block title %} Base Site {% endblock %}
     </title>
-    
+
 </head>
 
 
@@ -160,7 +163,7 @@
         <a href="/info">Info</a>
     </div>
     <div id="content", name="content", class="main">
-        <h2>{% block header %} {% endblock %} </h1>
+        <h2>{% block header %} {% endblock %} </h2>
         <hr >
         {% block description %}
         {% endblock %}
@@ -168,8 +171,10 @@
         {% endblock %}
         {% block button %}
         {% endblock %}
+        <input type="text" id="foo" value='enter math' onblur="matthy(this)">
     </div>
-    
+
+
 </body>
 
 </html>

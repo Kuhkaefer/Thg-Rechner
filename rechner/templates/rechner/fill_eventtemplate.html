@@ -1,5 +1,7 @@
 {% extends 'rechner/base.html' %}
+{% load static %}
 
+<script src="{% static 'main.js' %}"></script>
 {% block title %}
 {{ page_name }}
 {% endblock %}
@@ -43,7 +45,9 @@
                 <tr>
                     <td>{{forloop.counter}}. {{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %}</td>
                     <td>
-                        <input id="id_subject" type="text" name={{q.id}} maxlength="20" size="6" required value={{d}} style="direction: rtl;float:right;">
+                        <input id="id_subject"  name={{q.id}} maxlength="20"
+                               size="6" required value={{d}} style="direction:rtl;float:right;"
+                               onblur="matthy(this)">
                     </td>
                     <td>
                             <button type='submit' name="enter" value=1 hidden="hidden">-</button>
