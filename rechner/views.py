@@ -99,7 +99,8 @@ def result(request):
 
     ## Plot result
     c_results = pd.DataFrame({"x":"Emissionen","category name":cnames, "category values":cvalues})
-    fig = go.Figure(px.bar(c_results, x="x", y="category values", color="category name", text="category name"))
+    #fig = go.Figure(px.bar(c_results, x="category name", y="category values"))#, color="category name", text="category name"))
+    fig = go.Figure(px.pie(c_results, names="category name", values="category values", color="category name", width=800, height=400))#, color="category name", text="category name"))
     plt_div = plot(fig, output_type='div')
     print(type(plt_div))
     #plt_div2= '<iframe width="200" height="200" frameborder="0" seamless="seamless" scrolling="no" src='+plt_div+'.embed?width=200&height=200&link=false&showlegend=false></iframe>'
@@ -114,7 +115,7 @@ def result(request):
         'plt_div':plt_div,
         }
 
-    return render(request, 'rechner/simple_page.html', context)
+    return render(request, 'rechner/plot.html', context)
 
 
 ## Abfrage-Seite
