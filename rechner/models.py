@@ -80,25 +80,6 @@ class Question(models.Model):
     # Unit
     unit = models.CharField(max_length=20, blank=True)
 
-    # Link to emission(s)
-    emissions = models.ManyToManyField(Emission, blank=True)
-
-    # multiply with n_ppl or not
-    multiply_by_ppl = models.BooleanField(default=False)
-
-    # Calculate emissions with user input (value)
-    def calc(self, value, n_ppl=1):
-        emission_sum = 0
-        # Loop through related emissions
-        for e in emissions:
-            # sum up and multiply with user entry
-            emission_sum += e.emission * value
-        # multply with number of participants
-        if self.multiply_by_ppl:
-            emission_sum *= n_ppl
-        # return result
-        return emission_sum
-
     # Representation
     def __str__(self):
         return self.question_text
@@ -117,7 +98,7 @@ class EventTemplate(models.Model):
 
 
 # Defaultwerte
-class DefaultAmounts(models.Model):
+class DefaultAmount(models.Model):
     # Link to question
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
 
@@ -125,8 +106,25 @@ class DefaultAmounts(models.Model):
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
     # Default value
-    value = models.DecimalField(max_digits=10, decimal_places=5, verbose_name=_('Default Value'), blank=True, null=True)
+    value = models.DecimalField(max_digits=10, decimal_places=3, verbose_name=_('Default Value'), blank=True, null=True)
 
     # Representation
     def __str__(self):
         return f"default for {self.question.name} in {self.template.name}"
+
+class CalculationFactor(models.Model):
+    # Link to question
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+
+    # Link to emission
+    emission = models.ForeignKey(Emission, on_delete=models.CASCADE)
+
+    # calculation factor
+    factor = models.DecimalField(max_digits=10, decimal_places=3, default=1)
+
+    # fixed or multiplied by user input
+    fixed = models.BooleanField(default=False)
+
+    # Representation
+    def __str__(self):
+        return f"Factor for {self.question.name} in {self.emission.name}"

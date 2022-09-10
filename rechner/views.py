@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from .models import EventTemplate, Question, DefaultAmounts, Category
+from .models import EventTemplate, Question, DefaultAmount, Category, CalculationFactor
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import numpy as np
@@ -76,18 +76,24 @@ def result(request):
 
         # emission per question
         sum_per_q = 0
-        for emi in question.emissions.all():
+        for cf in question.calculationfactor_set.all():
+            emi = cf.emission
+
             # Check units
             if question.unit != emi.unit:
                 raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
-            sum_per_q += float(emi.value)
-        sum_per_q *= user_value
+
+            # multiply with user input and add to questions emission
+            if cf.fixed:
+                sum_per_q += float(emi.value)
+            else:
+                sum_per_q += float(emi.value)*user_value
 
         # add to emission per category
         sum_per_c += sum_per_q
 
         # total emission per category (skip categories without related emissions)
-        if (len(question.emissions.all())>0):
+        if (len(question.calculationfactor_set.all())>0):
             any_e_per_c += 1
         if entry[C.iL] and (any_e_per_c>0):
             sum_per_c_dict[category.name] = [sum_per_c]
@@ -142,7 +148,7 @@ def fill_event_template(request, template_id):
         print("first")
         print(request.GET.get('remove_field'))
         # template questions list and defaults as values list
-        def_amnts = event_template.defaultamounts_set.all()
+        def_amnts = event_template.defaultamount_set.all()
         data  = np.zeros((len(def_amnts), C.columns))
         for i,df in enumerate(def_amnts):
             data[i,C.iQ] = df.question.pk
