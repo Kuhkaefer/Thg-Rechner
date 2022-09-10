@@ -55,7 +55,7 @@ def result(request):
 
     # Preparation
     sum_per_e = 0
-    sum_per_c_dict = {}
+    #sum_per_c_dict = {}
     any_e_per_c = 0
     cnames = []
     cvalues = []
@@ -84,11 +84,11 @@ def result(request):
                 raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
 
             # consider emission factors
-            print("emi factors")
             emi_value = float(emi.value)
             for emission_factor in emi.factor.all():
-                print(emission_factor.name)
                 emi_value *= float(emission_factor.value)
+            print(emi.name)
+            print(emi_value)
 
             # multiply with user input and add to questions emission
             if cf.fixed:
@@ -103,7 +103,7 @@ def result(request):
         if (len(question.calculationfactor_set.all())>0):
             any_e_per_c += 1
         if entry[C.iL] and (any_e_per_c>0):
-            sum_per_c_dict[category.name] = [sum_per_c]
+            #sum_per_c_dict[category.name] = [sum_per_c]
             cnames.append(category.name)
             cvalues.append(sum_per_c)
 
@@ -119,12 +119,15 @@ def result(request):
     #plt_div2= '<iframe width="200" height="200" frameborder="0" seamless="seamless" scrolling="no" src='+plt_div+'.embed?width=200&height=200&link=false&showlegend=false></iframe>'
     #fig.show()
 
+    sum_per_e = round(sum_per_e*100)/100
+    for i in range(len(cvalues)):
+        cvalues[i] = round(cvalues[i]*100)/100
 
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
         'page_description': f'discombobulated combobulator.\n {user_data[:,C.iV]}',
-        'page_content' : f'{sum_per_c_dict}\nTotal emissions: {sum_per_e} Mio t CO2eq.',
+        'page_content' : f'Total emissions: {sum_per_e} kg CO2eq.',
         'plt_div':plt_div,
         }
 

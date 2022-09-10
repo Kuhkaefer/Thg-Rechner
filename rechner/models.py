@@ -150,6 +150,9 @@ class CalculationFactor(models.Model):
     # fixed or multiplied by user input
     fixed = models.BooleanField(default=False)
 
+    # explanation
+    expl =  models.CharField(max_length=100, blank=True)
+
     # Representation
     def __str__(self):
         return f"Factor for {self.question.name} in {self.emission.name}"
