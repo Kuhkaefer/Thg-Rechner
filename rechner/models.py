@@ -17,13 +17,19 @@ class Category(models.Model):
 
 class Source(models.Model):
     # Name of Source
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=100)
 
     # Author
+    author =  models.CharField(max_length=100, blank=True)
+
+    # trusted
+    trust =  models.CharField(max_length=50, blank=True)
 
     # URL
+    url =  models.URLField(max_length=500, blank=True)
 
     # Year
+    year =  models.CharField(max_length=50, blank=True)
 
     # Explanation
     expl = models.CharField(max_length=2000, blank=True)
@@ -47,6 +53,9 @@ class Emission(models.Model):
     # source
     source = models.ManyToManyField(Source, blank=True)
 
+    # Explanation
+    explanation = models.CharField(max_length=1000, blank=True)
+
     # Representation
     def __str__(self):
         return self.name
@@ -65,8 +74,8 @@ class Question(models.Model):
     info_text = models.CharField(max_length=1000, default="", blank=True)
 
     # Link to category
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='name',
-                                 default='Unsortiert')  # wollen wir wirklich, dass Fragen gelöscht werden, wenn wir die Kategorie löschen?
+    category = models.ForeignKey(Category, on_delete=models.SET_DEFAULT, to_field='name',
+                                 default='Sonstige')
 
     # Unit
     unit = models.CharField(max_length=20, blank=True)
