@@ -83,11 +83,18 @@ def result(request):
             if question.unit != emi.unit:
                 raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
 
+            # consider emission factors
+            print("emi factors")
+            emi_value = float(emi.value)
+            for emission_factor in emi.factor.all():
+                print(emission_factor.name)
+                emi_value *= float(emission_factor.value)
+
             # multiply with user input and add to questions emission
             if cf.fixed:
-                sum_per_q += float(emi.value)
+                sum_per_q += emi_value
             else:
-                sum_per_q += float(emi.value)*user_value
+                sum_per_q += emi_value*user_value
 
         # add to emission per category
         sum_per_c += sum_per_q

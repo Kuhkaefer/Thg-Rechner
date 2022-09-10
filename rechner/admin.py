@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Emission, Question, EventTemplate, DefaultAmount, Source, CalculationFactor
+from .models import Category, Emission, Question, EventTemplate, DefaultAmount, Source, CalculationFactor, EmissionFactor
 
 # Register your models here.
 admin.site.register(Category)
@@ -14,10 +14,10 @@ class SourceAdminInline(admin.TabularInline):
 class EmissionAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
-            'fields': ('name', 'value', 'source', 'unit', 'explanation')
+            'fields': ('name', 'value', 'source', 'unit', 'explanation', 'factor')
         }),
     )
-    search_fields = ['name', 'value', 'source', 'unit', 'explanation']
+    search_fields = ['name', 'value', 'source', 'unit', 'explanation', 'factor']
 
 class DefaultAmountsInline(admin.TabularInline):
     model = DefaultAmount
@@ -25,6 +25,12 @@ class DefaultAmountsInline(admin.TabularInline):
 class FactorsInline(admin.TabularInline):
     model = CalculationFactor
 
+# class FactorsInline(admin.TabularInline):
+#     model = EmissionFactor
+
+@admin.register(EmissionFactor)
+class EmissionFactorAdmin(admin.ModelAdmin):
+    pass
 
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):

@@ -39,6 +39,28 @@ class Source(models.Model):
         return self.name
 
 
+class EmissionFactor(models.Model):
+
+    # name
+    name = models.CharField(max_length=100, unique=True)
+
+    # Factor
+    value = models.DecimalField(max_digits=13, decimal_places=7)
+
+    # unit
+    unit = models.CharField(max_length=100, blank=True)
+
+    # description
+    info = models.CharField(max_length=1000, blank=True)
+
+    # Source
+    source = models.ManyToManyField(Source, blank=True)
+
+    # Representation
+    def __str__(self):
+        return self.name
+
+
 # emission data
 class Emission(models.Model):
     # Name of product
@@ -52,6 +74,9 @@ class Emission(models.Model):
 
     # source
     source = models.ManyToManyField(Source, blank=True)
+
+    # EmissionFactor
+    factor = models.ManyToManyField(EmissionFactor, blank=True)
 
     # Explanation
     explanation = models.CharField(max_length=1000, blank=True)
