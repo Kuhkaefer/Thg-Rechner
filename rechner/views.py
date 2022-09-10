@@ -87,9 +87,7 @@ def result(request):
             emi_value = float(emi.value)
             for emission_factor in emi.factor.all():
                 emi_value *= float(emission_factor.value)
-            print(emi.name)
-            print(emi_value)
-
+                
             # multiply with user input and add to questions emission
             if cf.fixed:
                 sum_per_q += emi_value
@@ -126,7 +124,7 @@ def result(request):
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
-        'page_description': f'discombobulated combobulator.\n {user_data[:,C.iV]}',
+        'page_description': f'discombobulated combobulator.\n ',
         'page_content' : f'Total emissions: {sum_per_e} kg CO2eq.',
         'plt_div':plt_div,
         }
@@ -165,6 +163,7 @@ def fill_event_template(request, template_id):
             data[i,C.iV] = df.value
             data[i,C.iC] = df.question.category.pk
             data[i,C.iU] = False if df.question.unit in ["", " "] else True
+            data[i,C.iI] = False if df.question.info_text in ["", " "] else True
             data[i,C.iO] = i
             print(df.question.name)
             print(f"-{df.question.unit}-")
@@ -196,9 +195,9 @@ def fill_event_template(request, template_id):
 
             #try float(ui):
             try:
-                data[i,C.iV] = ui
+                data[i,C.iV] = eval(ui)
             except:
-                data[i,C.iV] = 0
+                data[i,C.iV] = None
                 can_submit=False
 
         # Read added fields
@@ -207,11 +206,13 @@ def fill_event_template(request, template_id):
 
             # User did add field
             if added_field_qid >= 0:
-                print("Added field")
+                q = get_object_or_404(Question, pk=added_field_qid)
                 row = np.zeros(data[0].shape)
                 row[C.iQ] = added_field_qid
-                row[C.iC] = get_object_or_404(Question, pk=added_field_qid).category.pk
+                row[C.iC] = q.category.pk
                 row[C.iO] = np.max(data[:,C.iO])+1
+                row[C.iU] = False if q.unit in ["", " "] else True
+                row[C.iI] = False if q.info_text in ["", " "] else True
                 data = np.vstack([data,row])
 
                 # Sort data again
@@ -306,7 +307,7 @@ def fill_event_template(request, template_id):
     # create context dict
     context = {
         'template_instance':event_template,
-        'q_v_f_l_and_u':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU]),
+        'q_v_f_l_u_and_i':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU],data[:,C.iI]),
         'missing_qs':missqs_list,
         'missing_cats': misscats_list,
         'cat_added':added_cat,

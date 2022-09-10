@@ -1,7 +1,5 @@
 {% extends 'rechner/base.html' %}
-{% load static %}
 
-<script src="{% static 'main.js' %}"></script>
 {% block title %}
 {{ page_name }}
 {% endblock %}
@@ -34,7 +32,7 @@
             <tr> </tr>
             <tr> </tr>
             <tr> </tr>
-            {% for q,d,first,last,has_unit in q_v_f_l_and_u %}
+            {% for q,d,first,last,has_unit,has_info in q_v_f_l_u_and_i %}
 
 <!--          Show category -->
                 {% if first %}
@@ -46,16 +44,18 @@
                     <td>{{forloop.counter}}. {{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %}</td>
                     <td>
                         <input id="id_subject"  name={{q.id}} maxlength="20"
-                               size="6" required value={{d}} style="direction:rtl;float:right;"
-                               onblur="matthy(this)">
+                               size="6" required value={{d}} style="float:right;">
                     </td>
                     <td>
                             <button type='submit' name="enter" value=1 hidden="hidden">-</button>
                             <button type='submit' name="remove_field" value={{q.id}} class="button del_button"><b>-</b></button>
                     </td>
+<!--          Info Hint -->
                     <td>
+                      {% if has_info %}
                             <div class = "myDIV"> ? </div>
-                            <div class = "hide"> BUH! </div>
+                            <div class = "hide"> {{q.info_text}} </div>
+                      {% endif %}
                     </td>
                 </tr>
 
@@ -121,8 +121,7 @@
                 </td>
             {% if cat_added != None %}
                 <tr>
-                    <td>Neuer Posten aus {{cat_added}}:</td>
-                    <td>
+                    <td> <b>Neuer Posten aus {{cat_added}}: </b>
                         <select name="new_field">
                             <option value="-1"> ... </option>
                             {% for mc in new_c_q_list %}
@@ -133,7 +132,6 @@
                     </td>
                 </tr>
             {% endif %}
-            </tr>
         </table>
         <br>
 
