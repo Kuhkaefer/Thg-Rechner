@@ -15,15 +15,18 @@
 {% endblock %}
 
 {% block content %}
-<p> {{page_content}} </p>
-
+<p> Gesamtemissionen: {{co2_sum}} kg CO2eq. </p>
 
 {% autoescape off%}
-{{ plt_div }}
+{{ plot }}
 {% endautoescape %}
 
+{{table_content}}
+
+{{table|safe}}
 
 {% endblock %}
+
 
 {% block button %}
 {% if button_link != None %}

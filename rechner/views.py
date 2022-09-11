@@ -54,11 +54,9 @@ def result(request):
     ## Calculate Emissions (total & per category)
 
     # Preparation
-    sum_per_e = 0
-    #sum_per_c_dict = {}
-    any_e_per_c = 0
-    cnames = []
-    cvalues = []
+    result_df = pd.DataFrame(columns=["Produkt", "Feld", "Kategorie", \
+                                "Menge", "Einheit", "CO2/St.","CO2 gesamt", "Anmerkung"])
+    i = 0
 
     # Loop through questions
     for entry in user_data:
@@ -68,67 +66,76 @@ def result(request):
         category = get_object_or_404(Category, pk=entry[C.iC])
         user_value = entry[C.iV]
 
-
-        # reset emission per category
-        if entry[C.iF]:
-            sum_per_c = 0
-            any_e_per_c = 0
-
         # emission per question
-        sum_per_q = 0
         for cf in question.calculationfactor_set.all():
             emi = cf.emission
+
+            result_df.loc[i,"Produkt"] = emi.name
+            result_df.loc[i,"Feld"] = question.name
+            result_df.loc[i,"Kategorie"] = question.category.name
+            result_df.loc[i,"Einheit"] = emi.unit
+            result_df.loc[i,"Anmerkung"] = emi.explanation
 
             # Check units
             if question.unit != emi.unit:
                 raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
 
-            # consider calculation factor
-            emi_value = float(emi.value)*float(cf.factor)
-
-            # consider emission factors
-            for emission_factor in emi.factor.all():
-                emi_value *= float(emission_factor.value)
-
-            # multiply with user input and add to questions emission
+            # get amount
             if cf.fixed:
-                sum_per_q += emi_value
+                result_df.loc[i,"Menge"] = float(cf.factor)
             else:
-                sum_per_q += emi_value*user_value
+                result_df.loc[i,"Menge"] = float(cf.factor)*user_value
 
-        # add to emission per category
-        sum_per_c += sum_per_q
+            # get emission per unit & consider emission factors
+            result_df.loc[i,"CO2/St."] =  float(emi.value)
+            for emission_factor in emi.factor.all():
+                result_df.loc[i,"CO2/St."] *= float(emission_factor.value)
 
-        # total emission per category (skip categories without related emissions)
-        if (len(question.calculationfactor_set.all())>0):
-            any_e_per_c += 1
-        if entry[C.iL] and (any_e_per_c>0):
-            #sum_per_c_dict[category.name] = [sum_per_c]
-            cnames.append(category.name)
-            cvalues.append(sum_per_c)
+            # multiply with amount and add to questions emission
+            result_df.loc[i,"CO2 gesamt"] = result_df.loc[i,"CO2/St."]  * result_df.loc[i,"Menge"]
 
-        # add to emission per event
-        sum_per_e += sum_per_q
+            # raise counter
+            i += 1
+
+    # cleanup
+    del i
+
+    # get CO2 sum per unique entry in column "col"
+    def sum_per(col, drop_zero=True, on_col="CO2 gesamt", reset_index=True, sort=False, sort_on=None):
+        if sort_on is None:
+            sort_on = on_col
+
+        out = pd.DataFrame(result_df.groupby(col)[on_col].sum())
+
+        if drop_zero:
+            out= out.loc[out[on_col]!=0,:]
+
+        if reset_index:
+            out.reset_index(inplace=True)
+
+        if sort:
+            out.sort_values(sort_on, ascending=False, inplace=True)
+
+        return out
+
+    ## Create output table
+    # df with CO2 sum per question, sorted in descending order by CO2 gesamt:
+    # table = sum_per("Feld", reset_index=False, sort=True)
+
+    # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
+    table = result_df.sort_values("CO2 gesamt", ascending=False)
 
     ## Plot result
-    c_results = pd.DataFrame({"x":"Emissionen","category name":cnames, "category values":cvalues})
-    #fig = go.Figure(px.bar(c_results, x="category name", y="category values"))#, color="category name", text="category name"))
-    fig = go.Figure(px.pie(c_results, names="category name", values="category values", color="category name", width=800, height=400))#, color="category name", text="category name"))
+    fig = go.Figure(px.pie(sum_per("Kategorie"), names="Kategorie", values="CO2 gesamt", color="Kategorie", width=800, height=400))#, color="category name", text="category name"))
     plt_div = plot(fig, output_type='div')
-    print(type(plt_div))
-    #plt_div2= '<iframe width="200" height="200" frameborder="0" seamless="seamless" scrolling="no" src='+plt_div+'.embed?width=200&height=200&link=false&showlegend=false></iframe>'
-    #fig.show()
-
-    sum_per_e = round(sum_per_e*100)/100
-    for i in range(len(cvalues)):
-        cvalues[i] = round(cvalues[i]*100)/100
 
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
         'page_description': f'discombobulated combobulator.\n ',
-        'page_content' : f'Total emissions: {sum_per_e} kg CO2eq.',
-        'plt_div':plt_div,
+        'table' : table.to_html(),
+        'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(3),
+        'plot':plt_div,
         }
 
     return render(request, 'rechner/plot.html', context)
@@ -144,7 +151,6 @@ def fill_event_template(request, template_id):
     # submitting ok?
     can_submit = True
     reset      = False
-
 
     ## Resetting
     print(request.POST.get('reset'))
@@ -170,6 +176,7 @@ def fill_event_template(request, template_id):
             print(df.question.name)
             print(f"-{df.question.unit}-")
             print(data[i,C.iU])
+        del i
 
         # sort by category and Order
         idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
@@ -192,15 +199,16 @@ def fill_event_template(request, template_id):
         ## Read user input
 
         # Read entered values
-        for i,q in enumerate(data[:,C.iQ]):
+        for j,q in enumerate(data[:,C.iQ]):
             ui = request.POST.get(str(int(q)))
 
             #try float(ui):
             try:
-                data[i,C.iV] = eval(ui)
+                data[j,C.iV] = eval(ui)
             except:
-                data[i,C.iV] = None
+                data[j,C.iV] = None
                 can_submit=False
+        del j
 
         # Read added fields
         if request.POST.get('add_field') != None:
