@@ -83,11 +83,13 @@ def result(request):
             if question.unit != emi.unit:
                 raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
 
+            # consider calculation factor
+            emi_value = float(emi.value)*float(cf.factor)
+
             # consider emission factors
-            emi_value = float(emi.value)
             for emission_factor in emi.factor.all():
                 emi_value *= float(emission_factor.value)
-                
+
             # multiply with user input and add to questions emission
             if cf.fixed:
                 sum_per_q += emi_value
