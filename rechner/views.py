@@ -103,7 +103,6 @@ def result(request):
 
             # get question index in user_data
             i = np.max(i)
-            print(user_data[i,C.iV])
 
             # get idx of question in result_df
             idx = result_df[result_df.Feld==advice.user_q.name].index.values
@@ -156,15 +155,14 @@ def result(request):
 
             # save to result_df
             reduction_df.loc[c,"Option"] = advice_text
-            reduction_df.loc[c,"Abs. Reduktion"] = reduction
-            reduction_df.loc[c,"Rel. Gesamt-Reduktion"] = relative_reduction
+            reduction_df.loc[c,"Abs. Reduktion [kg]"] = reduction
+            reduction_df.loc[c,"Rel. Gesamt-Reduktion [%]"] = relative_reduction
             reduction_df.loc[c,"Feld"] = advice.user_q.name
-            print(idx)
             reduction_df.loc[c,"Produkt-Nr."] = str(idx)
             c+=1
 
-        # total relative reduction
-        total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
+    # total relative reduction
+    total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
 
     ## Create output table
     # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
