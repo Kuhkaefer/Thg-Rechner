@@ -15,8 +15,9 @@ from rechner import constants as C
 def index(request):
     page_text = f"Wähle ein Veranstaltungsformat als Vorlage:"
 
-    # Check template choice, If button clicked (I think)
+    # Check template choice and nu of ppl, If button clicked (I think)
     if request.method == "POST":
+       nu_of_ppl = int(request.POST.get('nu_of_ppl'))
        choice = request.POST.get('chosen_template')
        if choice == "":
            choice = "/rechner"
@@ -24,6 +25,7 @@ def index(request):
            page_text += '. WRONG CHOICE'
            print("wrong choice")
        else:
+           request.session['nu_of_ppl'] = nu_of_ppl
            return HttpResponseRedirect(f'{choice}')
 
     # If first call of page
@@ -204,26 +206,25 @@ def fill_event_template(request, template_id):
     print(request.POST.get('reset'))
     if (request.method == "POST") & (request.POST.get('reset')=='Reset'):
         reset = True
-        print("reset")
 
     ## First Call
     if (request.method == "GET") or reset:
         ## Initialize values
-        print("first")
-        print(request.GET.get('remove_field'))
+        nu_of_ppl = request.session["nu_of_ppl"]
         # template questions list and defaults as values list
         def_amnts = event_template.defaultamount_set.all()
         data  = np.zeros((len(def_amnts), C.columns))
         for i,df in enumerate(def_amnts):
             data[i,C.iQ] = df.question.pk
-            data[i,C.iV] = df.value
+            if df.question.name=="Teilnehmende":
+                data[i,C.iV] = nu_of_ppl
+            else:
+                # scale default amount with number of ppl
+                data[i,C.iV] = df.value*nu_of_ppl*int(df.scale)
             data[i,C.iC] = df.question.category.pk
             data[i,C.iU] = False if df.question.unit in ["", " "] else True
             data[i,C.iI] = False if df.question.info_text in ["", " "] else True
             data[i,C.iO] = i
-            print(df.question.name)
-            print(f"-{df.question.unit}-")
-            print(data[i,C.iU])
         del i
 
         # sort by category and Order
@@ -240,7 +241,7 @@ def fill_event_template(request, template_id):
 
     ## Later Call
     elif request.method == "POST":
-        print("POST")
+
         ## Read session
         data = np.array(request.session['user_data'])
 

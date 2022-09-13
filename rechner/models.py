@@ -133,6 +133,9 @@ class DefaultAmount(models.Model):
     # Default value
     value = models.DecimalField(max_digits=10, decimal_places=3, verbose_name=_('Default Value'), blank=True, null=True)
 
+    # Scale with number of people?
+    scale = models.BooleanField(default=True)
+
     # Representation
     def __str__(self):
         return f"Default für {self.question.name} in {self.template.name}"
@@ -170,6 +173,9 @@ class Advice(models.Model):
 
     # text
     text = models.CharField(max_length=200, blank=True)
+
+    # source
+    source = models.ManyToManyField(Source, blank=True)
 
     # Representation
     def __str__(self):
