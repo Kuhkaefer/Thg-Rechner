@@ -165,8 +165,8 @@ class Advice(models.Model):
     # Link to suggested Question
     suggested_q = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True, related_name="suggested_question")
 
-    # suggested value
-    suggested_v = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
+    # suggested reduction factor
+    suggested_f = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
 
     # text
     text = models.CharField(max_length=200, blank=True)

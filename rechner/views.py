@@ -109,13 +109,13 @@ def result(request):
 
             # get advice content
             has_new_q = True if np.any(advice.suggested_q) else False
-            has_new_v = True if np.any(advice.suggested_v) else False
+            has_new_v = True if np.any(advice.suggested_f) else False
             has_text = True if hasattr(advice, "text") else False
 
             # Calculate Reduction Effect
             old_co2 = result_df.loc[result_df["Feld"]==advice.user_q.name,"CO2 gesamt"].sum()
             new_q = advice.suggested_q if has_new_q else advice.user_q
-            new_v = advice.suggested_v if has_new_v else user_data[i,C.iV]
+            new_v = float(advice.suggested_f)*user_data[i,C.iV] if has_new_v else user_data[i,C.iV]
             new_co2 = 0
             for cf in new_q.calculationfactor_set.all():
                 _,_,temp = H.calc_co2(cf,new_v)
@@ -124,16 +124,14 @@ def result(request):
             reduction = new_co2-old_co2
             relative_reduction = reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
             total_reduction += reduction
-            print(old_co2)
-            print(new_co2)
 
             # Create Advice string
             if len(advice.text)>0:
                 advice_text = advice.text.format(
-                    advice.user_q.name,
-                    advice.suggested_q.name if has_new_q else None,
-                    advice.suggested_v if has_new_v else None,
-                    reduction,relative_reduction)
+                    user_q=advice.user_q.name,
+                    suggested_q=advice.suggested_q.name if has_new_q else None,
+                    suggested_v=new_v if has_new_v else None,
+                    reduction=reduction,relative_reduction=relative_reduction)
             else:
                 # prepare advice text
                 advice_text = ""
@@ -144,11 +142,11 @@ def result(request):
 
                 # if different value suggested:
                 if has_new_v:
-                    if advice.suggested_v < user_data[i,iV]:
+                    if new_v < user_data[i,C.iV]:
                         direction = "Reduziere"
                     else:
                         direction = "Erhöhe"
-                    advice_text +=  f"{direction} auf {advice.suggested_v}. "
+                    advice_text +=  f"{direction} '{advice.user_q.name}' auf {new_v}. "
 
                 # Result
                 # advice_text +=  f"Resultat: {reduction:+.3f} kg ({relative_reduction:+.2f} %). "
@@ -156,20 +154,21 @@ def result(request):
             # save to result_df
             reduction_df.loc[c,"Option"] = advice_text
             reduction_df.loc[c,"Abs. Reduktion [kg]"] = reduction
-            reduction_df.loc[c,"Rel. Gesamt-Reduktion [%]"] = relative_reduction
+            reduction_df.loc[c,"Rel. Gesamt-Reduktion [%]"] = round(relative_reduction*100)/100
             reduction_df.loc[c,"Feld"] = advice.user_q.name
             reduction_df.loc[c,"Produkt-Nr."] = str(idx)
             c+=1
 
     # total relative reduction
     total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
+    reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
 
     ## Create output table
     # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
     # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
 
     # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
-    table = result_df.sort_values("CO2 gesamt", ascending=False)
+    table = result_df.sort_values(["Kategorie","CO2 gesamt"], ascending=False)
 
     ## Plot result
     fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
