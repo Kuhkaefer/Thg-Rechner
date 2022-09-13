@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from .models import EventTemplate, Question, DefaultAmount, Category, CalculationFactor
+from .models import EventTemplate, Question, DefaultAmount, Category, CalculationFactor, Advice
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import numpy as np
@@ -45,6 +45,7 @@ def index(request):
 
 ## Ergebnis Seite
 def result(request):
+
     # Chosen Event-Template
     event_template = request.session['event_template_id']
 
@@ -63,77 +64,127 @@ def result(request):
 
         # get stuff
         question = get_object_or_404(Question, pk=entry[C.iQ])
-        category = get_object_or_404(Category, pk=entry[C.iC])
         user_value = entry[C.iV]
 
         # emission per question
         for cf in question.calculationfactor_set.all():
-            emi = cf.emission
 
+            # get miscellaneous
+            emi = cf.emission
             result_df.loc[i,"Produkt"] = emi.name
             result_df.loc[i,"Feld"] = question.name
             result_df.loc[i,"Kategorie"] = question.category.name
             result_df.loc[i,"Einheit"] = emi.unit
             result_df.loc[i,"Anmerkung"] = emi.explanation
 
-            # Check units
-            if question.unit != emi.unit:
-                raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
-
-            # get amount
-            if cf.fixed:
-                result_df.loc[i,"Menge"] = float(cf.factor)
-            else:
-                result_df.loc[i,"Menge"] = float(cf.factor)*user_value
-
-            # get emission per unit & consider emission factors
-            result_df.loc[i,"CO2/St."] =  float(emi.value)
-            for emission_factor in emi.factor.all():
-                result_df.loc[i,"CO2/St."] *= float(emission_factor.value)
-
-            # multiply with amount and add to questions emission
-            result_df.loc[i,"CO2 gesamt"] = result_df.loc[i,"CO2/St."]  * result_df.loc[i,"Menge"]
+            # calculate emission
+            result_df.loc[i,"CO2/St."], result_df.loc[i,"Menge"], result_df.loc[i,"CO2 gesamt"] = H.calc_co2(cf, user_value)
 
             # raise counter
             i += 1
 
     # cleanup
-    del i
+    del i, emi, question, user_value, entry
 
-    # get CO2 sum per unique entry in column "col"
-    def sum_per(col, drop_zero=True, on_col="CO2 gesamt", reset_index=True, sort=False, sort_on=None):
-        if sort_on is None:
-            sort_on = on_col
+    ## Create Advice list
 
-        out = pd.DataFrame(result_df.groupby(col)[on_col].sum())
+    # Preparation
+    total_reduction = 0
+    c = 0
+    reduction_df = pd.DataFrame()
 
-        if drop_zero:
-            out= out.loc[out[on_col]!=0,:]
+    # loop through advice
+    for advice in Advice.objects.all():
 
-        if reset_index:
-            out.reset_index(inplace=True)
+        # check if question is part of user's input
+        i = np.where(user_data[:,C.iQ]==advice.user_q.id)[0]
 
-        if sort:
-            out.sort_values(sort_on, ascending=False, inplace=True)
+        if i.size>0:
 
-        return out
+            # get question index in user_data
+            i = np.max(i)
+            print(user_data[i,C.iV])
+
+            # get idx of question in result_df
+            idx = result_df[result_df.Feld==advice.user_q.name].index.values
+
+            # get advice content
+            has_new_q = True if np.any(advice.suggested_q) else False
+            has_new_v = True if np.any(advice.suggested_v) else False
+            has_text = True if hasattr(advice, "text") else False
+
+            # Calculate Reduction Effect
+            old_co2 = result_df.loc[result_df["Feld"]==advice.user_q.name,"CO2 gesamt"].sum()
+            new_q = advice.suggested_q if has_new_q else advice.user_q
+            new_v = advice.suggested_v if has_new_v else user_data[i,C.iV]
+            new_co2 = 0
+            for cf in new_q.calculationfactor_set.all():
+                _,_,temp = H.calc_co2(cf,new_v)
+                new_co2 += temp
+            del temp
+            reduction = new_co2-old_co2
+            relative_reduction = reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
+            total_reduction += reduction
+            print(old_co2)
+            print(new_co2)
+
+            # Create Advice string
+            if len(advice.text)>0:
+                advice_text = advice.text.format(
+                    advice.user_q.name,
+                    advice.suggested_q.name if has_new_q else None,
+                    advice.suggested_v if has_new_v else None,
+                    reduction,relative_reduction)
+            else:
+                # prepare advice text
+                advice_text = ""
+
+                # if different question suggested:
+                if has_new_q:
+                    advice_text +=  f"Ersetze '{advice.user_q.name}' mit '{advice.suggested_q.name}'. "
+
+                # if different value suggested:
+                if has_new_v:
+                    if advice.suggested_v < user_data[i,iV]:
+                        direction = "Reduziere"
+                    else:
+                        direction = "Erhöhe"
+                    advice_text +=  f"{direction} auf {advice.suggested_v}. "
+
+                # Result
+                # advice_text +=  f"Resultat: {reduction:+.3f} kg ({relative_reduction:+.2f} %). "
+
+            # save to result_df
+            reduction_df.loc[c,"Option"] = advice_text
+            reduction_df.loc[c,"Abs. Reduktion"] = reduction
+            reduction_df.loc[c,"Rel. Gesamt-Reduktion"] = relative_reduction
+            reduction_df.loc[c,"Feld"] = advice.user_q.name
+            print(idx)
+            reduction_df.loc[c,"Produkt-Nr."] = str(idx)
+            c+=1
+
+        # total relative reduction
+        total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
 
     ## Create output table
-    # df with CO2 sum per question, sorted in descending order by CO2 gesamt:
-    # table = sum_per("Feld", reset_index=False, sort=True)
+    # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
+    # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
 
     # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
     table = result_df.sort_values("CO2 gesamt", ascending=False)
 
     ## Plot result
-    fig = go.Figure(px.pie(sum_per("Kategorie"), names="Kategorie", values="CO2 gesamt", color="Kategorie", width=800, height=400))#, color="category name", text="category name"))
+    fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
+                    values="CO2 gesamt", color="Kategorie", width=800, height=400))#, color="category name", text="category name"))
     plt_div = plot(fig, output_type='div')
 
+    # Create output
     context = {
         'page_name':'CO2 Result',
         'page_header':'CO2 Result',
         'page_description': f'discombobulated combobulator.\n ',
         'table' : table.to_html(),
+        'reduction_table' : reduction_df.to_html(),
         'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(3),
         'plot':plt_div,
         }

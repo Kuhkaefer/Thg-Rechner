@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Category, Emission, Question, EventTemplate, DefaultAmount, Source, CalculationFactor, EmissionFactor
+from .models import Category, Emission, Question, EventTemplate, DefaultAmount, \
+Source, CalculationFactor, EmissionFactor, Advice
 
 # Register your models here.
 admin.site.register(Category)
@@ -40,3 +41,7 @@ class EventTemplateAdmin(admin.ModelAdmin):
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [FactorsInline]
+
+@admin.register(Advice)
+class AdviceAdmin(admin.ModelAdmin):
+    model = Advice

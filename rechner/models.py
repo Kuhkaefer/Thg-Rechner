@@ -135,7 +135,7 @@ class DefaultAmount(models.Model):
 
     # Representation
     def __str__(self):
-        return f"default for {self.question.name} in {self.template.name}"
+        return f"Default für {self.question.name} in {self.template.name}"
 
 class CalculationFactor(models.Model):
     # Link to question
@@ -155,4 +155,22 @@ class CalculationFactor(models.Model):
 
     # Representation
     def __str__(self):
-        return f"Factor for {self.question.name} in {self.emission.name}"
+        return f"Faktor für {self.emission.name} in {self.question.name}"
+
+class Advice(models.Model):
+
+    # Link to chosen Question
+    user_q = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_question")
+
+    # Link to suggested Question
+    suggested_q = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True, related_name="suggested_question")
+
+    # suggested value
+    suggested_v = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
+
+    # text
+    text = models.CharField(max_length=200, blank=True)
+
+    # Representation
+    def __str__(self):
+        return f"Klimatipp für {self.user_q}"

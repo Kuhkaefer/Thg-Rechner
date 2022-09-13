@@ -1,7 +1,7 @@
 import numpy as np
+import pandas as pd
 from rechner import constants as C
 from .models import EventTemplate, Question, DefaultAmount, Category, CalculationFactor
-
 
 
 # Get booleans for first and last question of category
@@ -30,3 +30,50 @@ def get_missing(data):
     missing_cats = list(all_cats.difference(set(data[:,C.iC])))
 
     return missing_qs, missing_cats
+
+
+# Calculate CO2 for single Question's Emission
+def calc_co2(calc_factor, value):
+
+        # get emission and question
+        emi = calc_factor.emission
+        question = calc_factor.question
+
+        # Check units
+        if question.unit != emi.unit:
+            raise Exception(f"Unit Mismatch!: \"{question.name}\" expects {question.unit}, wheras \"{emi.name}\" requires {emi.unit}.")
+
+        # get amount
+        if calc_factor.fixed:
+            amount = float(calc_factor.factor)
+        else:
+            amount = float(calc_factor.factor)*value
+
+        # get emission per unit & consider emission factors
+        co2_per_unit =  float(emi.value)
+        for emission_factor in emi.factor.all():
+            co2_per_unit *= float(emission_factor.value)
+
+        # multiply with amount
+        co2_sum = co2_per_unit  * amount
+
+        return co2_per_unit, amount, co2_sum
+
+
+# get CO2 sum per unique entry in column "col"
+def sum_per(result_df, col, drop_zero=True, on_col="CO2 gesamt", reset_index=True, sort=False, sort_on=None):
+    if sort_on is None:
+        sort_on = on_col
+
+    out = pd.DataFrame(result_df.groupby(col)[on_col].sum())
+
+    if drop_zero:
+        out= out.loc[out[on_col]!=0,:]
+
+    if reset_index:
+        out.reset_index(inplace=True)
+
+    if sort:
+        out.sort_values(sort_on, ascending=False, inplace=True)
+
+    return out
