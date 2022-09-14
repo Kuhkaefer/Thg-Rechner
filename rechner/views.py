@@ -15,18 +15,28 @@ from rechner import constants as C
 def index(request):
     page_text = f"Wähle ein Veranstaltungsformat als Vorlage:"
 
-    # Check template choice and nu of ppl, If button clicked (I think)
     if request.method == "POST":
-       nu_of_ppl = int(request.POST.get('nu_of_ppl'))
-       choice = request.POST.get('chosen_template')
-       if choice == "":
-           choice = "/rechner"
-           print(choice)
-           page_text += '. WRONG CHOICE'
-           print("wrong choice")
-       else:
-           request.session['nu_of_ppl'] = nu_of_ppl
-           return HttpResponseRedirect(f'{choice}')
+
+        # Check template choice and nu of ppl, If button clicked (I think)
+        choice = request.POST.get('chosen_template')
+
+        # no choice
+        if choice == "":
+            choice = "/rechner"
+
+        # valid choice
+        else:
+            event_template = request.session['event_template_id']
+
+            # get number of participants
+            if len(request.POST.get('nu_of_ppl')) > 0:
+                nu_of_ppl = int(request.POST.get('nu_of_ppl'))
+            else:
+                ppl_id = Question.objects.filter(name='Teilnehmende')[0]
+                nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+
+            request.session['nu_of_ppl'] = nu_of_ppl
+            return HttpResponseRedirect(f'{choice}')
 
     # If first call of page
     else:
@@ -211,7 +221,12 @@ def fill_event_template(request, template_id):
     if (request.method == "GET") or reset:
         ## Initialize values
         nu_of_ppl = request.session["nu_of_ppl"]
-        # template questions list and defaults as values list
+
+        # get default number of ppl
+        ppl_id = Question.objects.filter(name='Teilnehmende')[0]
+        def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+
+        # get question, default value, category and more
         def_amnts = event_template.defaultamount_set.all()
         data  = np.zeros((len(def_amnts), C.columns))
         for i,df in enumerate(def_amnts):
@@ -220,7 +235,10 @@ def fill_event_template(request, template_id):
                 data[i,C.iV] = nu_of_ppl
             else:
                 # scale default amount with number of ppl
-                data[i,C.iV] = df.value*nu_of_ppl*int(df.scale)
+                if df.scale:
+                    data[i,C.iV] = round(float(df.value)*nu_of_ppl/def_nu_of_ppl*2)/2
+                else:
+                    data[i,C.iV] = float(df.value)
             data[i,C.iC] = df.question.category.pk
             data[i,C.iU] = False if df.question.unit in ["", " "] else True
             data[i,C.iI] = False if df.question.info_text in ["", " "] else True
