@@ -13,29 +13,31 @@
 {% endblock %}
 
 {% block content %}
+
+<table style="width:50%">
 <p>
-Quelle: {{ source.name }}
+<tr><td>Quelle:</td><td>{{ source.name }}</td></tr>
 </p>
 
 <p>
-Autor: {{ source.author }}
+<tr><td>Autor:</td><td>{{ source.author }}</td></tr>
 </p>
 
 <p>
-URL: <a href={{ source.url }}>{{ source.url }}</a>
+<tr><td>URL: </td><td><a href={{ source.url }}>{{ source.url }}</a></td></tr>
 </p>
 
 <p>
-Year: {{ source.year }}
+<tr><td>Year: </td><td>{{ source.year }}</td></tr>
 </p>
 
 <p>
-Trust: {{ source.trust }}
+<tr><td>Trust: </td><td>{{ source.trust }}</td></tr>
 </p>
 
 <p>
-Explanation: {{ source.expl }}
+<tr><td>Explanation: </td><td>{{ source.expl }}</td></tr>
 </p>
-
+</table>
 
 {% endblock %}
