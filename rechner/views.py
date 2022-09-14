@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
-from .models import EventTemplate, Question, DefaultAmount, Category, CalculationFactor, Advice
+from .models import EventTemplate, Question, DefaultAmount, Category, \
+                    CalculationFactor, Advice, Source
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import numpy as np
@@ -36,7 +37,7 @@ def index(request):
                 nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
 
             request.session['nu_of_ppl'] = nu_of_ppl
-            return HttpResponseRedirect(f'{choice}')
+            return HttpResponseRedirect(f'event/{choice}')
 
     # If first call of page
     else:
@@ -398,5 +399,7 @@ def fill_event_template(request, template_id):
     # Render Form
     return render(request, 'rechner/fill_eventtemplate.html', context)
 
-def base(request):
-    return render(request, 'rechner/base.html',{"page_header":"jo"})
+def source(request, source_id):
+    s = get_object_or_404(Source,pk=source_id)
+    context = {"source":s}
+    return render(request, 'rechner/source.html',context)

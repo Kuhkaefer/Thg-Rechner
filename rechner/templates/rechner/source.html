@@ -1,0 +1,41 @@
+{% extends 'rechner/base.html' %}
+
+{% block title %}
+  {{ page_name }}
+{% endblock %}
+
+{% block header %}
+  {{ page_header }}
+{% endblock %}
+
+{% block description %}
+  {{page_description}}
+{% endblock %}
+
+{% block content %}
+<p>
+Quelle: {{ source.name }}
+</p>
+
+<p>
+Autor: {{ source.author }}
+</p>
+
+<p>
+URL: <a href={{ source.url }}>{{ source.url }}</a>
+</p>
+
+<p>
+Year: {{ source.year }}
+</p>
+
+<p>
+Trust: {{ source.trust }}
+</p>
+
+<p>
+Explanation: {{ source.expl }}
+</p>
+
+
+{% endblock %}
