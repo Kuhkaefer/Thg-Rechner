@@ -10,6 +10,10 @@ class Category(models.Model):
     # Name of category
     name = models.CharField(max_length=100, unique=True)
 
+    # fix plural
+    class Meta:
+        verbose_name_plural = "Categories"
+
     # Representation
     def __str__(self):
         return self.name
@@ -55,6 +59,10 @@ class EmissionFactor(models.Model):
 
     # Source
     source = models.ManyToManyField(Source, blank=True)
+
+    # fix plural
+    class Meta:
+        verbose_name = "Emission Factor"
 
     # Representation
     def __str__(self):
@@ -107,7 +115,7 @@ class Question(models.Model):
 
     # Representation
     def __str__(self):
-        return self.question_text
+        return self.name
 
 # Templates for Event Types
 class EventTemplate(models.Model):
@@ -116,6 +124,10 @@ class EventTemplate(models.Model):
 
     # Short name of event type for url display
     shorty = models.CharField(max_length=15, unique=True)
+
+    # fix name
+    class Meta:
+        verbose_name = "Event Template"
 
     # Representation
     def __str__(self):
@@ -156,6 +168,10 @@ class CalculationFactor(models.Model):
     # explanation
     expl =  models.CharField(max_length=100, blank=True)
 
+
+    # class Meta:
+    #     ordering = ('emission.name',)
+
     # Representation
     def __str__(self):
         return f"Faktor für {self.emission.name} in {self.question.name}"
@@ -164,6 +180,7 @@ class Advice(models.Model):
 
     # Link to chosen Question
     user_q = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="user_question")
+
 
     # Link to suggested Question
     suggested_q = models.ForeignKey(Question, on_delete=models.CASCADE, blank=True, null=True, related_name="suggested_question")
@@ -177,6 +194,14 @@ class Advice(models.Model):
     # source
     source = models.ManyToManyField(Source, blank=True)
 
+    # fix plural
+    class Meta:
+        verbose_name_plural = "Advice"
+
     # Representation
     def __str__(self):
-        return f"Klimatipp für {self.user_q}"
+        if self.suggested_q is not None:
+            temp_name = f"Klimatipp für {self.user_q} → {self.suggested_q}"
+        else:
+            temp_name = f"Klimatipp für {self.user_q}"
+        return temp_name

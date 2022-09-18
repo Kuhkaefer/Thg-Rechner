@@ -1,47 +1,57 @@
 from django.contrib import admin
 from .models import Category, Emission, Question, EventTemplate, DefaultAmount, \
 Source, CalculationFactor, EmissionFactor, Advice
-
-# Register your models here.
-admin.site.register(Category)
-admin.site.register(Source)
+from django.db.models.functions import Lower
 
 
-class SourceAdminInline(admin.TabularInline):
-    model = Emission.source.through
-
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields=["name"]
+    ordering=["name"]
 
 @admin.register(Emission)
 class EmissionAdmin(admin.ModelAdmin):
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'value', 'source', 'unit', 'explanation', 'factor')
-        }),
-    )
-    search_fields = ['name', 'value', 'source', 'unit', 'explanation', 'factor']
+    search_fields = ['name']
+    ordering=["name"]
+    autocomplete_fields=["source"]
+
+class CFactorsInline(admin.TabularInline):
+    model = CalculationFactor
+    autocomplete_fields = ['emission']
+
+@admin.register(EmissionFactor)
+class EFactorsInline(admin.ModelAdmin):
+    autocomplete_fields = ['source']
+    def get_ordering(self, request):
+        return [Lower('name')]
+
 
 class DefaultAmountsInline(admin.TabularInline):
     model = DefaultAmount
-
-class FactorsInline(admin.TabularInline):
-    model = CalculationFactor
-
-# class FactorsInline(admin.TabularInline):
-#     model = EmissionFactor
-
-@admin.register(EmissionFactor)
-class EmissionFactorAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ['question']
 
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):
     inlines = [DefaultAmountsInline]
-
+    def get_ordering(self, request):
+        return [Lower('name')]
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    inlines = [FactorsInline]
+    inlines = [CFactorsInline]
+    def get_ordering(self, request):
+        return [Lower('name')]
+
+    search_fields = ["name"]
+
+@admin.register(Source)
+class SourceAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+    def get_ordering(self, request):
+        return [Lower('name')]
 
 @admin.register(Advice)
 class AdviceAdmin(admin.ModelAdmin):
-    model = Advice
+    autocomplete_fields = ["user_q", "suggested_q", "source"]
+    def get_ordering(self, request):
+        return [Lower('user_q__name'),Lower('suggested_q__name')]
