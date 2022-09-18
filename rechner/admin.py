@@ -18,6 +18,7 @@ class EmissionAdmin(admin.ModelAdmin):
 class CFactorsInline(admin.TabularInline):
     model = CalculationFactor
     autocomplete_fields = ['emission']
+    extra=10
 
 @admin.register(EmissionFactor)
 class EFactorsInline(admin.ModelAdmin):

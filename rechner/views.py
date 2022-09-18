@@ -35,7 +35,11 @@ def index(request):
                 nu_of_ppl = int(request.POST.get('nu_of_ppl'))
             else:
                 ppl_id = Question.objects.filter(name='Teilnehmende')[0]
-                nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+                try:
+                    nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+                except:
+                    nu_of_ppl = 1
+
 
             request.session['nu_of_ppl'] = nu_of_ppl
             return HttpResponseRedirect(f'event/{choice}')
@@ -226,26 +230,44 @@ def fill_event_template(request, template_id):
 
         # get default number of ppl
         ppl_id = Question.objects.filter(name='Teilnehmende')[0]
-        def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+        try:
+            def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+        except:
+            def_nu_of_ppl = 1
+
 
         # get question, default value, category and more
-        def_amnts = event_template.defaultamount_set.all()
-        data  = np.zeros((len(def_amnts), C.columns))
-        for i,df in enumerate(def_amnts):
-            data[i,C.iQ] = df.question.pk
-            if df.question.name=="Teilnehmende":
-                data[i,C.iV] = nu_of_ppl
-            else:
-                # scale default amount with number of ppl
-                if df.scale:
-                    data[i,C.iV] = round(float(df.value)*nu_of_ppl/def_nu_of_ppl*2)/2
+
+        if event_template.name=="Alle":
+            data  = np.zeros((len(Question.objects.all()), C.columns))
+            for i,question in enumerate(Question.objects.all()):
+                data[i,C.iQ] = question.pk
+                data[i,C.iC] = question.category.pk
+                data[i,C.iU] = False if question.unit in ["", " "] else True
+                data[i,C.iI] = False if question.info_text in ["", " "] else True
+                data[i,C.iO] = i
+                if question.name=="Teilnehmende":
+                    data[i,C.iV] = nu_of_ppl
                 else:
-                    data[i,C.iV] = float(df.value)
-            data[i,C.iC] = df.question.category.pk
-            data[i,C.iU] = False if df.question.unit in ["", " "] else True
-            data[i,C.iI] = False if df.question.info_text in ["", " "] else True
-            data[i,C.iO] = i
-        del i
+                    data[i,C.iV] = 0
+        else:
+            def_amnts = event_template.defaultamount_set.all()
+            data  = np.zeros((len(def_amnts), C.columns))
+            for i,df in enumerate(def_amnts):
+                data[i,C.iQ] = df.question.pk
+                if df.question.name=="Teilnehmende":
+                    data[i,C.iV] = nu_of_ppl
+                else:
+                    # scale default amount with number of ppl
+                    if df.scale:
+                        data[i,C.iV] = round(float(df.value)*nu_of_ppl/def_nu_of_ppl*2)/2
+                    else:
+                        data[i,C.iV] = float(df.value)
+                data[i,C.iC] = df.question.category.pk
+                data[i,C.iU] = False if df.question.unit in ["", " "] else True
+                data[i,C.iI] = False if df.question.info_text in ["", " "] else True
+                data[i,C.iO] = i
+            del i
 
         # sort by category and Order
         idx = np.lexsort((data[:,C.iO],data[:,C.iC]))

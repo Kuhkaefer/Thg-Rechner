@@ -165,6 +165,9 @@ class CalculationFactor(models.Model):
     # fixed or multiplied by user input
     fixed = models.BooleanField(default=False)
 
+    # per participant or not
+    # pro_TN = models.BooleanField(default=False)
+
     # explanation
     expl =  models.CharField(max_length=100, blank=True)
 
