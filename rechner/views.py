@@ -20,6 +20,7 @@ def index(request):
 
         # Check template choice and nu of ppl, If button clicked (I think)
         choice = request.POST.get('chosen_template')
+        print(choice)
 
         # no choice
         if choice == "":
@@ -27,7 +28,7 @@ def index(request):
 
         # valid choice
         else:
-            event_template = request.session['event_template_id']
+            event_template = choice#request.session['event_template_id']
 
             # get number of participants
             if len(request.POST.get('nu_of_ppl')) > 0:
