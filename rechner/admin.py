@@ -30,6 +30,7 @@ class EFactorsInline(admin.ModelAdmin):
 class DefaultAmountsInline(admin.TabularInline):
     model = DefaultAmount
     autocomplete_fields = ['question']
+    extra=10
 
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):
