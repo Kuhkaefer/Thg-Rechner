@@ -194,8 +194,11 @@ class Advice(models.Model):
     # suggested reduction factor
     suggested_f = models.DecimalField(max_digits=10, decimal_places=3, blank=True, null=True)
 
-    # text
-    text = models.CharField(max_length=200, blank=True)
+    # text for name
+    text = models.CharField(max_length=200, blank=True, verbose_name="Description")
+
+    # info
+    info = models.CharField(max_length=200, blank=True)
 
     # source
     source = models.ManyToManyField(Source, blank=True)
