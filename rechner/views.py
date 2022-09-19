@@ -175,6 +175,7 @@ def result(request):
             reduction_df.loc[c,"Rel. Gesamt-Reduktion [%]"] = round(relative_reduction*100)/100
             reduction_df.loc[c,"Feld"] = advice.user_q.name
             reduction_df.loc[c,"Produkt-Nr."] = str(idx)
+            reduction_df.loc[c,"Hinweis"] = advice.info
             c+=1
 
     # total relative reduction
