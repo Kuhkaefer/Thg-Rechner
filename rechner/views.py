@@ -322,7 +322,7 @@ def fill_event_template(request, template_id):
                 row = np.zeros(data[0].shape)
                 row[C.iQ] = added_field_qid
                 row[C.iC] = q.category.pk
-                row[C.iS] = df.scale
+                row[C.iS] = True
                 row[C.iO] = np.max(data[:,C.iO])+1
                 row[C.iU] = False if q.unit in ["", " "] else True
                 row[C.iI] = False if q.info_text in ["", " "] else True
