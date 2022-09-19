@@ -33,7 +33,7 @@ def get_missing(data):
 
 
 # Calculate CO2 for single Question's Emission
-def calc_co2(calc_factor, value):
+def calc_co2(calc_factor, value, scale, nu_of_ppl):
 
         # get emission and question
         emi = calc_factor.emission
@@ -54,9 +54,15 @@ def calc_co2(calc_factor, value):
         for emission_factor in emi.factor.all():
             co2_per_unit *= float(emission_factor.value)
 
+
         # multiply with amount
         co2_sum = co2_per_unit  * amount
 
+        # multiply with participants
+        if scale:
+            co2_sum *= nu_of_ppl
+
+        # finalise
         return co2_per_unit, amount, co2_sum
 
 

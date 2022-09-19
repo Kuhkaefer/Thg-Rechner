@@ -20,7 +20,6 @@ def index(request):
 
         # Check template choice and nu of ppl, If button clicked (I think)
         choice = request.POST.get('chosen_template')
-        print(choice)
 
         # no choice
         if choice == "":
@@ -69,34 +68,35 @@ def result(request):
 
     # Array with users answers to questions of event template
     user_data = np.array(request.session["user_data"])
+    nu_of_ppl = int(float(request.session["nu_of_ppl"]))
 
     ## Calculate Emissions (total & per category)
 
     # Preparation
-    result_df = pd.DataFrame(columns=["Produkt", "Feld", "Kategorie", \
-                                "Menge", "Einheit", "CO2/St.","CO2 gesamt", "Anmerkung"])
+    result_df = pd.DataFrame()#columns=["Produkt", "Feld", "Kategorie", \
+                                # "Menge", "Einheit", "CO2/St.","CO2 gesamt", "Anmerkung"])
     i = 0
 
     # Loop through questions
     for entry in user_data:
-
         # get stuff
         question = get_object_or_404(Question, pk=entry[C.iQ])
         user_value = entry[C.iV]
 
         # emission per question
         for cf in question.calculationfactor_set.all():
-
             # get miscellaneous
             emi = cf.emission
             result_df.loc[i,"Produkt"] = emi.name
             result_df.loc[i,"Feld"] = question.name
             result_df.loc[i,"Kategorie"] = question.category.name
             result_df.loc[i,"Einheit"] = emi.unit
+            result_df.loc[i,"·TN"] = bool(entry[C.iS])
             result_df.loc[i,"Anmerkung"] = emi.explanation
 
             # calculate emission
-            result_df.loc[i,"CO2/St."], result_df.loc[i,"Menge"], result_df.loc[i,"CO2 gesamt"] = H.calc_co2(cf, user_value)
+            result_df.loc[i,"CO2/St."], result_df.loc[i,"Menge"], result_df.loc[i,"CO2 gesamt"] =\
+                H.calc_co2(cf, user_value, entry[C.iS], nu_of_ppl)
 
             # raise counter
             i += 1
@@ -136,7 +136,7 @@ def result(request):
             new_v = float(advice.suggested_f)*user_data[i,C.iV] if has_new_v else user_data[i,C.iV]
             new_co2 = 0
             for cf in new_q.calculationfactor_set.all():
-                _,_,temp = H.calc_co2(cf,new_v)
+                _,_,temp = H.calc_co2(cf,new_v,user_data[i,C.iS],nu_of_ppl)
                 new_co2 += temp
             del temp
             reduction = new_co2-old_co2
@@ -179,7 +179,8 @@ def result(request):
 
     # total relative reduction
     total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
-    reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
+    if np.any(reduction_df):
+        reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
 
     ## Create output table
     # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
@@ -200,7 +201,7 @@ def result(request):
         'page_description': f'discombobulated combobulator.\n ',
         'table' : table.to_html(),
         'reduction_table' : reduction_df.to_html(),
-        'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(3),
+        'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(2),
         'plot':plt_div,
         }
 
@@ -219,54 +220,61 @@ def fill_event_template(request, template_id):
     reset      = False
 
     ## Resetting
-    print(request.POST.get('reset'))
     if (request.method == "POST") & (request.POST.get('reset')=='Reset'):
         reset = True
 
     ## First Call
     if (request.method == "GET") or reset:
+        print("first call")
+
         ## Initialize values
         nu_of_ppl = request.session["nu_of_ppl"]
 
         # get default number of ppl
-        ppl_id = Question.objects.filter(name='Teilnehmende')[0]
+        ppl_q = Question.objects.filter(name='Teilnehmende')[0]
+        ppl_id = Question.objects.filter(name='Teilnehmende')[0].pk
         try:
-            def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+            def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_q,template=event_template)[0].value)
         except:
             def_nu_of_ppl = 1
 
 
         # get question, default value, category and more
-
         if event_template.name=="Alle":
-            data  = np.zeros((len(Question.objects.all()), C.columns))
-            for i,question in enumerate(Question.objects.all()):
-                data[i,C.iQ] = question.pk
-                data[i,C.iC] = question.category.pk
-                data[i,C.iU] = False if question.unit in ["", " "] else True
-                data[i,C.iI] = False if question.info_text in ["", " "] else True
-                data[i,C.iO] = i
+            data = np.zeros((len(Question.objects.all())-1, C.columns))
+            i = 0
+            for question in Question.objects.all():
                 if question.name=="Teilnehmende":
-                    data[i,C.iV] = nu_of_ppl
+                    pass
                 else:
+                    data[i,C.iQ] = question.pk
+                    data[i,C.iC] = question.category.pk
+                    data[i,C.iS] = True
+                    data[i,C.iU] = False if question.unit in ["", " "] else True
+                    data[i,C.iI] = False if question.info_text in ["", " "] else True
+                    data[i,C.iO] = i
                     data[i,C.iV] = 0
+                    i += 1
+            del i
         else:
             def_amnts = event_template.defaultamount_set.all()
-            data  = np.zeros((len(def_amnts), C.columns))
-            for i,df in enumerate(def_amnts):
-                data[i,C.iQ] = df.question.pk
+            if ppl_id in def_amnts.values_list("question",flat=True):
+                data = np.zeros((len(def_amnts)-1, C.columns))
+            else:
+                data = np.zeros((len(def_amnts), C.columns))
+            i = 0
+            for df in def_amnts:
                 if df.question.name=="Teilnehmende":
-                    data[i,C.iV] = nu_of_ppl
+                    pass
                 else:
-                    # scale default amount with number of ppl
-                    if df.scale:
-                        data[i,C.iV] = round(float(df.value)*nu_of_ppl/def_nu_of_ppl*2)/2
-                    else:
-                        data[i,C.iV] = float(df.value)
-                data[i,C.iC] = df.question.category.pk
-                data[i,C.iU] = False if df.question.unit in ["", " "] else True
-                data[i,C.iI] = False if df.question.info_text in ["", " "] else True
-                data[i,C.iO] = i
+                    data[i,C.iQ] = df.question.pk
+                    data[i,C.iV] = float(df.value)
+                    data[i,C.iC] = df.question.category.pk
+                    data[i,C.iS] = df.scale
+                    data[i,C.iU] = False if df.question.unit in ["", " "] else True
+                    data[i,C.iI] = False if df.question.info_text in ["", " "] else True
+                    data[i,C.iO] = i
+                    i += 1
             del i
 
         # sort by category and Order
@@ -289,9 +297,12 @@ def fill_event_template(request, template_id):
 
         ## Read user input
 
+        nu_of_ppl = request.POST.get("TNs")
+
         # Read entered values
         for j,q in enumerate(data[:,C.iQ]):
             ui = request.POST.get(str(int(q)))
+            data[j,C.iS] = 1 if request.POST.get("scale"+str(int(q)))=="on" else 0
 
             #try float(ui):
             try:
@@ -311,6 +322,7 @@ def fill_event_template(request, template_id):
                 row = np.zeros(data[0].shape)
                 row[C.iQ] = added_field_qid
                 row[C.iC] = q.category.pk
+                row[C.iS] = df.scale
                 row[C.iO] = np.max(data[:,C.iO])+1
                 row[C.iU] = False if q.unit in ["", " "] else True
                 row[C.iI] = False if q.info_text in ["", " "] else True
@@ -325,7 +337,6 @@ def fill_event_template(request, template_id):
 
         # Read added Category
         if request.POST.get('add_cat')!=None:
-            print("Added Category")
             added_cat_id = max(list(map(float,request.POST.getlist("new_cat"))))
             if (added_cat_id >= 0):
                 added_cat = get_object_or_404(Category,pk=added_cat_id)
@@ -339,7 +350,6 @@ def fill_event_template(request, template_id):
 
         # Read deleted field and delete it
         if request.POST.get('remove_field')!=None:
-            print("Removed field")
             data = np.delete(data, obj=np.argwhere(data[:,C.iQ]==float(request.POST.get('remove_field'))),axis=0)
 
             # Update first and last bools
@@ -354,6 +364,7 @@ def fill_event_template(request, template_id):
 
             # save entered values
             request.session['user_data'] = data.tolist()
+            request.session['nu_of_ppl'] = nu_of_ppl
 
             if can_submit:
                 # Move on to next page
@@ -368,6 +379,7 @@ def fill_event_template(request, template_id):
 
             # save entered values
             request.session['user_data'] = data.tolist()
+            request.session['nu_of_ppl'] = nu_of_ppl
 
             if can_submit:
                 # Move on to next page
@@ -384,9 +396,10 @@ def fill_event_template(request, template_id):
     ## Save data
     request.session['event_template_id'] = template_id
     request.session['user_data'] = data.tolist()
+    request.session['nu_of_ppl'] = nu_of_ppl
 
     ## DEbug
-
+    print("data:")
     print(data)
 
 
@@ -395,7 +408,7 @@ def fill_event_template(request, template_id):
     # Get model objects from IDs in numpy array
     q_list = []
     for qid in data[:,C.iQ]:
-        q_list.append(get_object_or_404(Question, pk=qid))
+        q_list.append(get_object_or_404(Question, pk=int(qid)))
 
     misscats_list = []
     for mcid in missing_cats:
@@ -406,9 +419,10 @@ def fill_event_template(request, template_id):
         missqs_list.append(get_object_or_404(Question, pk=mqid))
 
     # create context dict
+    scale = ["checked" if d else "" for d in data[:,C.iS]]
     context = {
         'template_instance':event_template,
-        'q_v_f_l_u_and_i':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU],data[:,C.iI]),
+        'q_v_f_l_u_i_and_s':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU],data[:,C.iI],scale),
         'missing_qs':missqs_list,
         'missing_cats': misscats_list,
         'cat_added':added_cat,
@@ -417,6 +431,7 @@ def fill_event_template(request, template_id):
         'page_header':f"Veranstaltung: {event_template.name}",
         'page_description':'Bitte trage die Menge der verschiedenen Posten ein:',
         'button_link':'/rechner',
+        'TNs':nu_of_ppl,
     }
 
     # Render Form
