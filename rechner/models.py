@@ -123,7 +123,7 @@ class EventTemplate(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     # Short name of event type for url display
-    shorty = models.CharField(max_length=15, unique=True)
+    shorty = models.CharField(max_length=15, unique=True, verbose_name=('short'))
 
     # fix name
     class Meta:
@@ -137,16 +137,19 @@ class EventTemplate(models.Model):
 # Defaultwerte
 class DefaultAmount(models.Model):
     # Link to question
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name=('Frage'))
 
     # Link to template
     template = models.ForeignKey(EventTemplate, on_delete=models.CASCADE)
 
     # Default value
-    value = models.DecimalField(max_digits=10, decimal_places=3, verbose_name=_('Default Value'), blank=True, null=True)
+    value = models.DecimalField(max_digits=10, decimal_places=3, verbose_name=('Default Wert'), blank=True, null=True)
 
     # Scale with number of people?
-    scale = models.BooleanField(default=True)
+    scale = models.BooleanField(default=True, verbose_name=('·#TN'))
+
+    # major aspect?
+    important = models.BooleanField(default=True, verbose_name=('Wichtig'))
 
     # Representation
     def __str__(self):
