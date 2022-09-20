@@ -66,6 +66,9 @@ def result(request):
     # Chosen Event-Template
     event_template = request.session['event_template_id']
 
+    # event name
+    event_name = request.session["event_name"]
+
     # Array with users answers to questions of event template
     user_data = np.array(request.session["user_data"])
     nu_of_ppl = int(float(request.session["nu_of_ppl"]))
@@ -118,6 +121,7 @@ def result(request):
         i = np.where(user_data[:,C.iQ]==advice.user_q.id)[0]
 
         if i.size>0:
+            print(advice)
 
             # get question index in user_data
             i = np.max(i)
@@ -126,8 +130,9 @@ def result(request):
             idx = result_df[result_df.Feld==advice.user_q.name].index.values
 
             # get advice content
-            has_new_q = True if np.any(advice.suggested_q) else False
-            has_new_v = True if np.any(advice.suggested_f) else False
+            print(advice.suggested_f)
+            has_new_q = False if advice.suggested_q is None else True
+            has_new_v = False if advice.suggested_f is None else True
             has_text = True if hasattr(advice, "text") else False
 
             # Calculate Reduction Effect
@@ -141,7 +146,6 @@ def result(request):
             del temp
             reduction = new_co2-old_co2
             relative_reduction = reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
-            total_reduction += reduction
 
             # Create Advice string
             if len(advice.text)>0:
@@ -164,11 +168,13 @@ def result(request):
                         direction = "Reduziere"
                     else:
                         direction = "Erhöhe"
-                    advice_text +=  f"{direction} '{advice.user_q.name}' auf {new_v}. "
+                    if has_new_q:
+                        advice_text +=  f"{direction} '{advice.suggested_q.name}' auf {new_v}. "
+                    else:
+                        advice_text +=  f"{direction} '{advice.user_q.name}' auf {new_v}. "
 
                 # Result
                 # advice_text +=  f"Resultat: {reduction:+.3f} kg ({relative_reduction:+.2f} %). "
-
             # save to result_df
             reduction_df.loc[c,"Option"] = advice_text
             reduction_df.loc[c,"Abs. Reduktion [kg]"] = reduction
@@ -179,16 +185,17 @@ def result(request):
             c+=1
 
     # total relative reduction
-    total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
     if np.any(reduction_df):
         reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
+    total_reduction = reduction_df.groupby("Feld").first().loc[:,"Abs. Reduktion [kg]"].sum()
+    total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
 
     ## Create output table
     # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
     # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
 
     # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
-    table = result_df.sort_values(["Kategorie","CO2 gesamt"], ascending=False)
+    table = result_df.sort_values(["CO2 gesamt"], ascending=False)
 
     ## Plot result
     fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
@@ -197,13 +204,14 @@ def result(request):
 
     # Create output
     context = {
-        'page_name':'CO2 Result',
-        'page_header':'CO2 Result',
+        'page_name':'CO2 Resultat',
+        'page_header':f'Ergebnis für "{event_name}"',
         'page_description': f'discombobulated combobulator.\n ',
         'table' : table.to_html(),
         'reduction_table' : reduction_df.to_html(),
         'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(2),
         'plot':plt_div,
+        'total_relative_reduction':round(total_relative_reduction*100)/100,
         }
 
     return render(request, 'rechner/plot.html', context)
@@ -230,6 +238,7 @@ def fill_event_template(request, template_id):
 
         ## Initialize values
         nu_of_ppl = request.session["nu_of_ppl"]
+        event_name = ""
 
         # get default number of ppl
         ppl_q = Question.objects.filter(name='Teilnehmende')[0]
@@ -298,7 +307,13 @@ def fill_event_template(request, template_id):
 
         ## Read user input
 
-        nu_of_ppl = request.POST.get("TNs")
+        event_name = request.POST.get("event_name")
+        print(f"event_name: {event_name}")
+        if event_name is "":
+            event_name = get_object_or_404(EventTemplate,pk=event_template.pk).name
+        nu_of_ppl = int(float(request.POST.get("TNs")))
+        if nu_of_ppl is None:
+            nu_of_ppl = 1
 
         # Read entered values
         for j,q in enumerate(data[:,C.iQ]):
@@ -366,6 +381,7 @@ def fill_event_template(request, template_id):
             # save entered values
             request.session['user_data'] = data.tolist()
             request.session['nu_of_ppl'] = nu_of_ppl
+            request.session['event_name'] = event_name
 
             if can_submit:
                 # Move on to next page
@@ -381,6 +397,7 @@ def fill_event_template(request, template_id):
             # save entered values
             request.session['user_data'] = data.tolist()
             request.session['nu_of_ppl'] = nu_of_ppl
+            request.session['event_name'] = event_name
 
             if can_submit:
                 # Move on to next page
@@ -398,6 +415,7 @@ def fill_event_template(request, template_id):
     request.session['event_template_id'] = template_id
     request.session['user_data'] = data.tolist()
     request.session['nu_of_ppl'] = nu_of_ppl
+    request.session['event_name'] = event_name
 
     ## DEbug
     print("data:")

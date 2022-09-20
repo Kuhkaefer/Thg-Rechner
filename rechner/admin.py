@@ -69,5 +69,6 @@ class AdviceAdmin(admin.ModelAdmin):
     autocomplete_fields = ["user_q", "suggested_q", "source"]
     readonly_fields=('pk',)
     list_display = ['__str__', "pk", 'suggested_f']
+    search_fields = ["user_q__name"]
     def get_ordering(self, request):
         return [Lower('user_q__name'),Lower('suggested_q__name')]
