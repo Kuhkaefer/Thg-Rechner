@@ -45,7 +45,10 @@ def calc_co2(calc_factor, value, scale, nu_of_ppl):
 
         # get amount
         if calc_factor.fixed:
-            amount = float(calc_factor.factor)
+            if value==0:
+                amount = 0
+            else:
+                amount = float(calc_factor.factor)
         else:
             amount = float(calc_factor.factor)*value
 
