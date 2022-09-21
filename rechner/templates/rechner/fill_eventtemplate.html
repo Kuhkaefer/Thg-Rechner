@@ -33,13 +33,6 @@
     <p> </p>
     <form action="" method="POST"> {% csrf_token %}
         <table id="q_table">
-
-              <!-- <tr>
-                <th style="width:20px"> jo</th>
-                <th  style="width:10%"> ja </th>
-                <th > ju</th>
-                <th  > ji</th>
-              </tr> -->
               <tr><th style="text-align:left">Allgemein</th></tr>
             <tr>
                 <td colspan="1"> Name der Veranstaltung: </td>
@@ -99,31 +92,8 @@
                 <tr>
                 </tr>
 
-
-<!--                <tr> <td>for so probieren</td></tr>
-                {% for new_qd in new_q_d_listlist %}
-                <tr> <td>{{new_qd.0}}</td></tr>
-                {% empty %}
-                <tr> <td>for so empty</td></tr>
-
-                {% endfor %}
-                    -->
-
-
-<!--          Show added questions -->
-<!--                {% if last %}
-                    {% for new_qd in new_q_d_list%}
-                        {% if new_qd.0.category == q.category %}
-                            <tr>
-                                <td>Question: {{new_qd.0.question_text }}</td>
-                                <td> <input id="id_subject" type="text" name={{new_qd.0.id}} maxlength="100" required value={{new_qd.1}}> </td>
-                            </tr>
-                        {% endif %}
-                    {% empty %}
-                    {% endfor %}
-                    <tr> <td>---</td> </tr>-->
-
 <!--              Option to add question -->
+                {% if last %}
                     <tr>
                       <td colspan="3"> </td>
                       <td>
