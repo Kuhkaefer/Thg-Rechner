@@ -25,63 +25,78 @@
             display: block;
             color: red;
         }
+        ul {list-style: none; padding: 0; }
+        li {position: relative; padding: 0 0 0 20px; list-style: none; }
+        li:before {content: '-'; position: absolute; top: 0; left: 0;}
     </style>
 
+    <p> </p>
     <form action="" method="POST"> {% csrf_token %}
-        <table style="width:50%">
-            <br/>
+        <table id="q_table">
+
+              <!-- <tr>
+                <th style="width:20px"> jo</th>
+                <th  style="width:10%"> ja </th>
+                <th > ju</th>
+                <th  > ji</th>
+              </tr> -->
+              <tr><th style="text-align:left">Allgemein</th></tr>
             <tr>
-                <td> Anzahl der Teilnehmenden (TN): </td>
-                <td> <input  name="TNs" maxlength="20"
-                       size="6" required value={{TNs}} type="number" step="1"> </td>
+                <td colspan="1"> Name der Veranstaltung: </td>
+                <td colspan="4">
+                  <input  name="event_name" maxlength="100" size="17" type="text">
+                </td>
             </tr>
-            <tr>
-                <td> Name der Veranstaltung: </td>
-                <td colspan="4"> <input  name="event_name" maxlength="100"
-                       size="30" type="text"> </td>
-            </tr>
+          <tr>
+              <td colspan="1"> Anzahl der Teilnehmenden (TN): </td>
+              <td>
+                <input  name="TNs" maxlength="18" size="6" required value={{TNs}} type="number" step="1">
+              </td>
+          </tr>
             {% for q,d,first,last,has_unit,has_info,scale in q_v_f_l_u_i_and_s %}
 
 <!--          Show category -->
                 {% if first %}
-                    <tr></tr>
-                    <tr></tr>
-                    <tr></tr>
-                    <tr style="float:left">
-                      <th><br>{{q.category}}</th>
-                    </tr>
-                    <tr style="font-size:16;color:grey">
-                      <td></td>
-                      <td style="float:right"> Menge&emsp;</td>
-                      <td>
-                        <div class = "myDIV" style="text-align:center"> ·TN </div>
-                        <div class = "hide"> Mit Zahl der Teilnehmenden multiplizieren </div>
-                      </td>
+                    <tr>
+                      <th style="text-align:left" colspan="1">
+                        <br>{{q.category}}</br>
+                      </th>
+                      <th style="font-weight:normal;color:grey;font-size:16;text-align:center">
+                         <br>Menge</br>
+                       </th>
+                      <th style="font-weight:normal;color:grey;font-size:16;text-align:center">
+                        <br>·TN</br>
+                      </th>
+                      <th style="font-weight:normal;color:grey;font-size:16;text-align:center" class="hide">
+                        <br>Mit Zahl der Teilnehmenden multiplizieren</br>
+                      </th>
                     </tr>
                 {% endif %}
 
 <!--          List questions -->
                 <tr>
-                    <td>{{forloop.counter}}. {{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %}</td>
+                    <td><li>{{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %} </li></td>
                     <td>
                         <input id="id_subject"  name={{q.id}} maxlength="20"
-                               size="6" required value={{d}} style="float:right;" type="number" step="any">
+                               size="6" required value={{d}} type="number" step="any">
                     </td>
                     <td style="text-align:center">
-                        <input type="checkbox" name="scale{{q.id}}" {{scale}}>
+                        <input type="checkbox" name="scale{{q.id}}" {{scale}} style="float:center;text-align:center">
                     </td>
                     <td>
                             <button type='submit' name="enter" value=1 hidden="hidden">-</button>
                             <button type='submit' name="remove_field" value={{q.id}}
-                              class="button del_button"><b>-</b></button>
+                              class="ar_btn remove_btn"><b>-</b></button>
                     </td>
 <!--          Info Hint -->
                     <td>
                       {% if has_info %}
-                            <div class = "myDIV"> (info) </div>
+                            <div class = "myDIV" style="float:right;text-align:right"> (info) </div>
                             <div class = "hide"> {{q.info_text}} </div>
                       {% endif %}
                     </td>
+                </tr>
+                <tr>
                 </tr>
 
 
@@ -110,51 +125,52 @@
 
 <!--              Option to add question -->
                     <tr>
-                        <td> <txt_grey> Posten hinzufügen: </txt_grey>
-                                <select name="new_field" >
-                                    <div class="dropdown">
-                                        <option value="-1"> ... </option>
-                                        <div class="dropdown-content" >
-                                        {% for add_q in missing_qs %}
-                                            {% if add_q.category == q.category %}
-                                                <option value={{add_q.id}}> {{ add_q.name }} </option>
-                                            {% endif %}
-                                        {% endfor %}
-                                        </div>
-                                    </div>
-                                </select>
-
-                                <input type='submit' name="add_field" value="+" class="add_button" >
-                        </td>
+                      <td colspan="3"> </td>
+                      <td>
+                      <div class="dropdown">
+                       <div class="ar_btn add_btn">+</div>
+                       <div class="dropdown-content" >
+                         {% for add_q in missing_qs %}
+                           {% if add_q.category == q.category %}
+                             <button type='submit' name="new_field" value={{add_q.id}}> {{ add_q.name }} </button>
+                           {% endif %}
+                         {% endfor %}
+                       </div>
+                      </div>
+                      </td>
                     </tr>
 
                 {% endif %}
 
             {% endfor %}
-            <tr><td><br></td></tr>
+            <tr><td><br/></td></tr>
 
 <!--      Option to add question of new category -->
             <tr>
-                <td> Posten neuer Kategorie:
-                    <select name="new_cat">
-                        <option value="-1"> ... </option>
-                        {% for mc in missing_cats %}
-                            <option value={{mc.id}} > {{ mc.name }} </option>
-                        {% endfor %}
-                    </select>
-                    <input type='submit' name="add_cat" value="+" class="add_button" >
-                </td>
+              <td colspan="1">
+                <div class="dropdown">
+                 <div class="dropbtn" style="font-weight:bold">Neue Kategorie:</div>
+                  <div class="dropdown-content"  >
+                    {% for mc in missing_cats %}
+                        <button type='submit' name="new_cat" value={{mc.id}} > {{ mc.name }} </button>
+                    {% endfor %}
+                  </div>
+                </div>
+              </td>
+            </tr>
             {% if cat_added != None %}
                 <tr>
-                    <td> <b>Neuer Posten aus {{cat_added}}: </b>
-                        <select name="new_field">
-                            <option value="-1"> ... </option>
-                            {% for mc in new_c_q_list %}
-                                <option value={{mc.id}} > {{ mc.name }} </option>
-                            {% endfor %}
-                            <input type='submit' name="add_field" value="+" class="add_button">
-                        </select>
-                    </td>
+                  <td colspan="3"> Neuer Posten aus {{cat_added}}: </td>
+                  <td colspan="1">
+                    <div class="dropdown">
+                     <div class="ar_btn add_btn" >+</div>
+                      <div class="dropdown-content"  >
+                        {% for mc in new_c_q_list %}
+                          <button  type='submit' value={{mc.id}} name="new_field"> {{ mc.name }} </button>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </td>
                 </tr>
             {% endif %}
         </table>

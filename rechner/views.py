@@ -49,8 +49,8 @@ def index(request):
 
     # create context
     context = {
-        'page_name':'CO2 Rechner',
-        'page_header':'CO2 Rechner',
+        'page_name':'Klimarina',
+        'page_header':'CO<sub>2</sub> Rechner',
         'page_text':page_text,
         'event_templates':EventTemplate.objects.all(),
         'button_link':'/rechner',
@@ -121,7 +121,6 @@ def result(request):
         i = np.where(user_data[:,C.iQ]==advice.user_q.id)[0]
 
         if i.size>0:
-            print(advice)
 
             # get question index in user_data
             i = np.max(i)
@@ -130,7 +129,6 @@ def result(request):
             idx = result_df[result_df.Feld==advice.user_q.name].index.values
 
             # get advice content
-            print(advice.suggested_f)
             has_new_q = False if advice.suggested_q is None else True
             has_new_v = False if advice.suggested_f is None else True
             has_text = True if hasattr(advice, "text") else False
@@ -308,7 +306,6 @@ def fill_event_template(request, template_id):
         ## Read user input
 
         event_name = request.POST.get("event_name")
-        print(f"event_name: {event_name}")
         if event_name is "":
             event_name = get_object_or_404(EventTemplate,pk=event_template.pk).name
         nu_of_ppl = int(float(request.POST.get("TNs")))
@@ -329,8 +326,8 @@ def fill_event_template(request, template_id):
         del j
 
         # Read added fields
-        if request.POST.get('add_field') != None:
-            added_field_qid = max(list(map(float,request.POST.getlist("new_field"))))
+        if request.POST.get('new_field') != None:
+            added_field_qid = int(request.POST.get("new_field"))
 
             # User did add field
             if added_field_qid >= 0:
@@ -352,8 +349,9 @@ def fill_event_template(request, template_id):
                 data = H.get_first_and_last(data)
 
         # Read added Category
-        if request.POST.get('add_cat')!=None:
-            added_cat_id = max(list(map(float,request.POST.getlist("new_cat"))))
+        print(request.POST.get("new_cat"))
+        if request.POST.get('new_cat')!=None:
+            added_cat_id = int(request.POST.get("new_cat"))
             if (added_cat_id >= 0):
                 added_cat = get_object_or_404(Category,pk=added_cat_id)
                 new_c_q_list = Question.objects.filter(category = added_cat)
@@ -448,7 +446,7 @@ def fill_event_template(request, template_id):
         'new_c_q_list':new_c_q_list,
         'page_name':f"CO2 bei {event_template.name}",
         'page_header':f"Veranstaltung: {event_template.name}",
-        'page_description':'Bitte trage die Menge der verschiedenen Posten ein:',
+        'page_description':'',
         'button_link':'/rechner',
         'TNs':nu_of_ppl,
     }

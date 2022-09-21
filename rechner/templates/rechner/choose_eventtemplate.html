@@ -5,16 +5,19 @@
 {% endblock %}
 
 {% block header %}
+{% autoescape off %}
     {{page_header}}
+{% endautoescape %}
 {% endblock %}
 
 {% block content %}
+{% autoescape off %}
     <p>{{page_text}}</p>
     <form  method='POST'>
         {% csrf_token %}
         <select name = "chosen_template">
             <option value="">
-                Choose...
+                ...
             </option>
             {% for template in event_templates %}
                 <option value="{{template.pk}}">
@@ -22,9 +25,10 @@
                 </option>
             {% endfor %}
         </select>
-        <p> Zahl der Teilnehmenden: <input id="nu_of_ppl" name="nu_of_ppl" size="4"> </p>
+        <p> Zahl der Teilnehmenden (optional): <input id="nu_of_ppl" name="nu_of_ppl" size="4"> </p>
         <button type='submit' onclick="location.href='{{button_link}}'">
         {{button_text}}
         </button>
     </form>
+{% endautoescape %}
 {% endblock %}
