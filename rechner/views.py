@@ -12,11 +12,19 @@ from plotly.offline import plot
 from rechner import helpers as H
 from rechner import constants as C
 
-## Index Seite
+## Index Seite (Choose Eventtemplate)
 def index(request):
-    page_text = f"Wähle ein Veranstaltungsformat als Vorlage:"
+
 
     if request.method == "POST":
+
+        # generate ID for Session
+        if "id" in request.session.keys():
+            request.session["id"] += 1
+        else:
+            request.session["id"] = 0
+        session_id = str(request.session["id"])
+        request.session[session_id] = {}
 
         # Check template choice and nu of ppl, If button clicked (I think)
         choice = request.POST.get('chosen_template')
@@ -27,7 +35,7 @@ def index(request):
 
         # valid choice
         else:
-            event_template = choice#request.session['event_template_id']
+            request.session[session_id]["template_id"] = choice
 
             # get number of participants
             if len(request.POST.get('nu_of_ppl')) > 0:
@@ -35,13 +43,13 @@ def index(request):
             else:
                 ppl_id = Question.objects.filter(name='Teilnehmende')[0]
                 try:
-                    nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_id,template=event_template)[0].value)
+                    nu_of_ppl = float(DefaultAmount.objects.filter(
+                        question=ppl_id,template=request.session[session_id]["template_id"])[0].value)
                 except:
                     nu_of_ppl = 1
 
-
-            request.session['nu_of_ppl'] = nu_of_ppl
-            return HttpResponseRedirect(f'event/{choice}')
+            request.session[session_id]['nu_of_ppl'] = nu_of_ppl
+            return HttpResponseRedirect(f'event{session_id}')
 
     # If first call of page
     else:
@@ -51,7 +59,7 @@ def index(request):
     context = {
         'page_name':'Klimarina',
         'page_header':'CO<sub>2</sub> Rechner',
-        'page_text':page_text,
+        'page_text':"Wähle ein Veranstaltungsformat als Vorlage:",
         'event_templates':EventTemplate.objects.all(),
         'button_link':'/rechner',
         'button_text':'Los!'
@@ -61,17 +69,17 @@ def index(request):
     return render(request,'rechner/choose_eventtemplate.html',context)
 
 ## Ergebnis Seite
-def result(request):
+def result(request, session_id):
 
     # Chosen Event-Template
-    event_template = request.session['event_template_id']
+    event_template = request.session[session_id]['event_template_id']
 
     # event name
-    event_name = request.session["event_name"]
+    event_name = request.session[session_id]["event_name"]
 
     # Array with users answers to questions of event template
-    user_data = np.array(request.session["user_data"])
-    nu_of_ppl = int(float(request.session["nu_of_ppl"]))
+    user_data = np.array(request.session[session_id]["user_data"])
+    nu_of_ppl = int(float(request.session[session_id]["nu_of_ppl"]))
 
     ## Calculate Emissions (total & per category)
 
@@ -216,8 +224,10 @@ def result(request):
 
 
 ## Abfrage-Seite
-def fill_event_template(request, template_id):
+def fill_event_template(request, session_id):
+
     ## Always 1
+    template_id = request.session[session_id]["template_id"]
 
     # event template
     event_template = get_object_or_404(EventTemplate, pk=template_id)
@@ -235,7 +245,7 @@ def fill_event_template(request, template_id):
         print("first call")
 
         ## Initialize values
-        nu_of_ppl = request.session["nu_of_ppl"]
+        nu_of_ppl = request.session[session_id]["nu_of_ppl"]
         event_name = ""
 
         # get default number of ppl
@@ -299,14 +309,15 @@ def fill_event_template(request, template_id):
 
     ## Later Call
     elif request.method == "POST":
-
+        print("later call")
+        
         ## Read session
-        data = np.array(request.session['user_data'])
+        data = np.array(request.session[session_id]['user_data'])
 
         ## Read user input
 
         event_name = request.POST.get("event_name")
-        if event_name is "":
+        if event_name=="":
             event_name = get_object_or_404(EventTemplate,pk=event_template.pk).name
         nu_of_ppl = int(float(request.POST.get("TNs")))
         if nu_of_ppl is None:
@@ -377,13 +388,13 @@ def fill_event_template(request, template_id):
             print("enter")
 
             # save entered values
-            request.session['user_data'] = data.tolist()
-            request.session['nu_of_ppl'] = nu_of_ppl
-            request.session['event_name'] = event_name
+            request.session[session_id]['user_data'] = data.tolist()
+            request.session[session_id]['nu_of_ppl'] = nu_of_ppl
+            request.session[session_id]['event_name'] = event_name
 
             if can_submit:
                 # Move on to next page
-                return HttpResponseRedirect('/rechner/result')
+                return HttpResponseRedirect(f'/rechner/result{session_id}')
             else:
                 pass
 
@@ -393,13 +404,13 @@ def fill_event_template(request, template_id):
             print("submit")
 
             # save entered values
-            request.session['user_data'] = data.tolist()
-            request.session['nu_of_ppl'] = nu_of_ppl
-            request.session['event_name'] = event_name
+            request.session[session_id]['user_data'] = data.tolist()
+            request.session[session_id]['nu_of_ppl'] = nu_of_ppl
+            request.session[session_id]['event_name'] = event_name
 
             if can_submit:
                 # Move on to next page
-                return HttpResponseRedirect('/rechner/result')
+                return HttpResponseRedirect(f'/rechner/result{session_id}')
             else:
                 pass
 
@@ -410,15 +421,10 @@ def fill_event_template(request, template_id):
     missing_qs, missing_cats = H.get_missing(data)
 
     ## Save data
-    request.session['event_template_id'] = template_id
-    request.session['user_data'] = data.tolist()
-    request.session['nu_of_ppl'] = nu_of_ppl
-    request.session['event_name'] = event_name
-
-    ## DEbug
-    print("data:")
-    print(data)
-
+    request.session[session_id]['event_template_id'] = template_id
+    request.session[session_id]['user_data'] = data.tolist()
+    request.session[session_id]['nu_of_ppl'] = nu_of_ppl
+    request.session[session_id]['event_name'] = event_name
 
     ## Create context
 

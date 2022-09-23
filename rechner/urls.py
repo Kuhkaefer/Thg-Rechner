@@ -19,7 +19,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('result/', views.result, name='result'),
-    path('event/<int:template_id>/', views.fill_event_template, name='fill-event-template'),
+    path('result<str:session_id>/', views.result, name='result'),
+    path('event<str:session_id>/', views.fill_event_template, name='fill-event-template'),
     path('source/<int:source_id>/', views.source, name='source'),
 ]
