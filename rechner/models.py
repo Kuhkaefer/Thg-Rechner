@@ -122,6 +122,9 @@ class EventTemplate(models.Model):
     # Name of event type
     name = models.CharField(max_length=100, unique=True)
 
+    # number of participants
+    participants = models.IntegerField(default=20)
+
     # Short name of event type for url display
     shorty = models.CharField(max_length=15, unique=True, verbose_name=('short'))
 

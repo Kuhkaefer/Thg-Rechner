@@ -37,13 +37,15 @@
             <tr>
                 <td colspan="1"> Name der Veranstaltung: </td>
                 <td colspan="4">
-                  <input  name="event_name" maxlength="100" size="17" type="text">
+                  {% autoescape off %}
+                  <input type="text" name="event_name" maxlength="100" size="17" required value={{event_name}}>
+                  {% endautoescape %}
                 </td>
             </tr>
           <tr>
               <td colspan="1"> Anzahl der Teilnehmenden (TN): </td>
               <td>
-                <input  name="TNs" maxlength="18" size="6" required value={{TNs}} type="number" step="1">
+                <input name="TNs" maxlength="18" size="6" required value={{TNs}} type="number" step="1">
               </td>
           </tr>
             {% for q,d,first,last,has_unit,has_info,scale in q_v_f_l_u_i_and_s %}

@@ -41,12 +41,8 @@ def index(request):
             if len(request.POST.get('nu_of_ppl')) > 0:
                 nu_of_ppl = int(request.POST.get('nu_of_ppl'))
             else:
-                ppl_id = Question.objects.filter(name='Teilnehmende')[0]
-                try:
-                    nu_of_ppl = float(DefaultAmount.objects.filter(
-                        question=ppl_id,template=request.session[session_id]["template_id"])[0].value)
-                except:
-                    nu_of_ppl = 1
+                event_template = get_object_or_404(EventTemplate, pk=choice)
+                nu_of_ppl = event_template.participants
 
             request.session[session_id]['nu_of_ppl'] = nu_of_ppl
             return HttpResponseRedirect(f'event{session_id}')
@@ -91,53 +87,38 @@ def fill_event_template(request, session_id):
 
         ## Initialize values
         nu_of_ppl = request.session[session_id]["nu_of_ppl"]
-        event_name = ""
+        event_name = event_template.name.replace("&","&#38;").replace(" ","&nbsp;")
 
         # get default number of ppl
-        ppl_q = Question.objects.filter(name='Teilnehmende')[0]
-        ppl_id = Question.objects.filter(name='Teilnehmende')[0].pk
-        try:
-            def_nu_of_ppl = float(DefaultAmount.objects.filter(question=ppl_q,template=event_template)[0].value)
-        except:
-            def_nu_of_ppl = 1
-
+        def_nu_of_ppl = event_template.participants
 
         # get question, default value, category and more
         if event_template.name=="Alle":
             data = np.zeros((len(Question.objects.all())-1, C.columns))
             i = 0
             for question in Question.objects.all():
-                if question.name=="Teilnehmende":
-                    pass
-                else:
-                    data[i,C.iQ] = question.pk
-                    data[i,C.iC] = question.category.pk
-                    data[i,C.iS] = True
-                    data[i,C.iU] = False if question.unit in ["", " "] else True
-                    data[i,C.iI] = False if question.info_text in ["", " "] else True
-                    data[i,C.iO] = i
-                    data[i,C.iV] = 0
-                    i += 1
+                data[i,C.iQ] = question.pk
+                data[i,C.iC] = question.category.pk
+                data[i,C.iS] = True
+                data[i,C.iU] = False if question.unit in ["", " "] else True
+                data[i,C.iI] = False if question.info_text in ["", " "] else True
+                data[i,C.iO] = i
+                data[i,C.iV] = 0
+                i += 1
             del i
         else:
             def_amnts = event_template.defaultamount_set.all()
-            if ppl_id in def_amnts.values_list("question",flat=True):
-                data = np.zeros((len(def_amnts)-1, C.columns))
-            else:
-                data = np.zeros((len(def_amnts), C.columns))
+            data = np.zeros((len(def_amnts), C.columns))
             i = 0
             for df in def_amnts:
-                if df.question.name=="Teilnehmende":
-                    pass
-                else:
-                    data[i,C.iQ] = df.question.pk
-                    data[i,C.iV] = float(df.value)
-                    data[i,C.iC] = df.question.category.pk
-                    data[i,C.iS] = df.scale
-                    data[i,C.iU] = False if df.question.unit in ["", " "] else True
-                    data[i,C.iI] = False if df.question.info_text in ["", " "] else True
-                    data[i,C.iO] = i
-                    i += 1
+                data[i,C.iQ] = df.question.pk
+                data[i,C.iV] = float(df.value)
+                data[i,C.iC] = df.question.category.pk
+                data[i,C.iS] = df.scale
+                data[i,C.iU] = False if df.question.unit in ["", " "] else True
+                data[i,C.iI] = False if df.question.info_text in ["", " "] else True
+                data[i,C.iO] = i
+                i += 1
             del i
 
         # sort by category and Order
@@ -161,7 +142,8 @@ def fill_event_template(request, session_id):
 
         ## Read user input
 
-        event_name = request.POST.get("event_name")
+        # read event name and number of participants
+        event_name = request.POST.get("event_name").replace(" ","&nbsp;")
         if event_name=="":
             event_name = get_object_or_404(EventTemplate,pk=event_template.pk).name
         nu_of_ppl = int(float(request.POST.get("TNs")))
@@ -300,6 +282,7 @@ def fill_event_template(request, session_id):
         'page_description':'',
         'button_link':'/rechner',
         'TNs':nu_of_ppl,
+        'event_name':event_name,
     }
 
     # Render Form
