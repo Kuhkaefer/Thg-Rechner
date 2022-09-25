@@ -453,23 +453,53 @@ def result(request, session_id):
     table = result_df.sort_values(["CO2 gesamt"], ascending=False)
 
     ## Plot result
+
+    # pie chart
     fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
-                    values="CO2 gesamt", color="Kategorie", width=600, height=400))#, color="category name", text="category name"))
-    plt_div = plot(fig, output_type='div')
+                    values="CO2 gesamt", color="Kategorie", width=400, height=300))
+
+    fig.update_layout(legend = {'title_text':'Kategorie','x' : 1.1, 'y':0.6, 'yanchor':'middle'},
+                      margin=go.layout.Margin(
+                        l=0, #left margin
+                        r=0, #right margin
+                        b=0, #bottom margin
+                        t=0, #top margin
+                      ),
+                      yaxis={'ticksuffix':"kg"}
+                      )
+    fig.update_traces(hovertemplate="%{label}<br>%{value} kg")
+    pie_chart = plot(fig, output_type='div')
+
+    # horizontal bars
+    fig = go.Figure(px.bar(table,x="CO2 gesamt",y="Produkt", orientation="h",
+                           width=400, height=20*table.shape[0],color="Kategorie",
+                           labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","Produkt":""}))
+    fig.update_layout(yaxis={'categoryorder':'total ascending','title_font_size':1},
+                      xaxis={"showgrid":True,"gridcolor":"grey"},
+                      margin=go.layout.Margin(
+                        l=0, #left margin
+                        r=0, #right margin
+                        b=0, #bottom margin
+                        t=25, #top margin
+                      ),
+                      plot_bgcolor='rgba(0,0,0,0)')
+    fig.update_traces(showlegend=False)
+    bar_chart = plot(fig, output_type='div')
 
     # Create output
     context = {
         'page_name':'CO2 Resultat',
         'page_header':f'Ergebnis für "{event_name}"',
-        'page_description': f'discombobulated combobulator.\n ',
+        'page_description': f'',
         'table' : table.to_html(),
         'reduction_table' : reduction_df.to_html(),
         'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(2),
-        'plot':plt_div,
+        'pie':pie_chart,
+        'bars':bar_chart,
         'total_relative_reduction':round(total_relative_reduction*100)/100,
         }
 
-    return render(request, 'rechner/plot.html', context)
+    return render(request, 'rechner/result.html', context)
 
 
 # show source

@@ -11,7 +11,6 @@
                 --orange: #FF9100;
             }
 
-
         .sidenav {
                 height:100%;
                 width:160px;
@@ -113,6 +112,45 @@
             color: white; /* All */
         }
 
+        .info_btn {
+          background-color: white; /* Filling */
+          border: 1px solid;
+          border-radius: 50%;
+          padding-top: 1px;
+          border-color: lightblue;
+          width: 20px;
+          height: 20px;
+          text-align: center;
+          float: center;
+          color: #6495ED;
+        }
+
+        .info_btn:hover {
+            background-color: lightblue;
+            /* color: white; /* All */ */
+            border-color: #6495ED;
+        }
+
+        /* Dropdown Content (Hidden by Default) */
+        .info-content {
+           display: none;
+           position: absolute;
+           background-color: #f1f1f1;
+           z-index: 1;
+           border-color: lightblue;
+           border-width: thin;
+           border-style: solid;
+           max-width:300px;
+           line-break: auto;
+           /* min-width: 160px;
+           max-width: 300px; */
+           padding: 4px 6px;
+           font-size: 14;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .info-content {display: block;}
+
         /* Dropdown Button */
         .dropbtn {
            color: black;
@@ -161,6 +199,7 @@
           text-align: left;
           /* background-color: lightgrey; */
         }
+
         /* Change color of dropdown links on hover */
         .dropdown-content option:hover {background-color: white;}
 
@@ -195,6 +234,7 @@
             border: solid 2px;
             margin-left: 0;
         }
+        div { word-wrap: break-word }
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

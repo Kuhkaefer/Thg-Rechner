@@ -86,8 +86,19 @@
 <!--          Info Hint -->
                     <td>
                       {% if has_info %}
-                            <div class = "myDIV" style="float:right;text-align:right"> (info) </div>
-                            <div class = "hide"> {{q.info_text}} </div>
+                       <div class="ar_btn info_btn" style="font-size:14" title="{{ q.info_text }} ">i</div>
+
+
+                      <!-- <i class="fa-solid fa-circle-info"></i> -->
+                            <!-- <div class = "myDIV" style="float:right;text-align:right"> (info) </div>
+                            <div class = "hide"> {{q.info_text}} </div> -->
+
+                             <!-- <div class="dropdown">
+                             <div class="ar_btn info_btn" style="font-size:14">i</div>
+                             <div class="info-content" >
+                               <option name="info-text"> {{ q.info_text }} </option>
+                             </div>
+                            </div> -->
                       {% endif %}
                     </td>
                 </tr>

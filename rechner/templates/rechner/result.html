@@ -15,15 +15,21 @@
 {% endblock %}
 
 {% block content %}
-<p> Gesamtemissionen: {{co2_sum}} kg CO2eq. </p>
+<p style="font-weight:normal;font-size:18"> Gesamtemissionen: <b>{{co2_sum}} kg </b>CO<sub>2 äq.</sub> </p>
 
 {% autoescape off%}
-{{ plot }}
+{{ pie }}
 {% endautoescape %}
 
-{{table_content}}
+<p style="font-size:18"> Aufschlüsselung: </p>
 
-{{table|safe}}
+{% autoescape off%}
+{{ bars }}
+{% endautoescape %}
+
+<!-- {{table_content}} -->
+
+<!-- {{table|safe}} -->
 
 <p>Theoretische Reduktionsmöglichkeiten: </p>
 {{reduction_table|safe}}
