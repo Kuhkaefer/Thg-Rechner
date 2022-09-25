@@ -93,6 +93,7 @@ def fill_event_template(request, session_id):
         def_nu_of_ppl = event_template.participants
 
         # get question, default value, category and more
+        # all questions
         if event_template.name=="Alle":
             data = np.zeros((len(Question.objects.all())-1, C.columns))
             i = 0
@@ -106,6 +107,7 @@ def fill_event_template(request, session_id):
                 data[i,C.iV] = 0
                 i += 1
             del i
+        # normal event template
         else:
             def_amnts = event_template.defaultamount_set.all()
             data = np.zeros((len(def_amnts), C.columns))
@@ -121,7 +123,7 @@ def fill_event_template(request, session_id):
                 i += 1
             del i
 
-        # sort by category and Order
+        # sort by category and order
         idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
         data = data[idx]
 
@@ -150,41 +152,78 @@ def fill_event_template(request, session_id):
         if nu_of_ppl is None:
             nu_of_ppl = 1
 
-        # Read entered values
-        for j,q in enumerate(data[:,C.iQ]):
-            ui = request.POST.get(str(int(q)))
-            data[j,C.iS] = 1 if request.POST.get("scale"+str(int(q)))=="on" else 0
 
-            #try float(ui):
-            try:
-                data[j,C.iV] = eval(ui)
-            except:
-                data[j,C.iV] = None
-                can_submit=False
-        del j
+        # Read entered values
+        if len(data)>0:
+            for j,q in enumerate(data[:,C.iQ]):
+                # freshly added field & page reloaded
+                if request.POST.get('new_field') != None:
+                    added_field_qid = int(request.POST.get("new_field"))
+                    if (q==added_field_qid):
+                        data[j,C.iS] = 1
+                        ui = data[j,C.iV]
+                    else:
+                        ui = request.POST.get(str(int(q)))
+                        data[j,C.iS] = 1 if request.POST.get("scale"+str(int(q)))=="on" else 0
+                # normally
+                else:
+                    ui = request.POST.get(str(int(q)))
+                    data[j,C.iS] = 1 if request.POST.get("scale"+str(int(q)))=="on" else 0
+                if np.isscalar(ui):
+                    data[j,C.iV] = ui
+                else:
+                    try:
+                        data[j,C.iV] = eval(ui)
+                    except:
+                        print(f"failed to eval {ui}")
+                        data[j,C.iV] = None
+                        can_submit=False
+            del j
 
         # Read added fields
+        refresh_add = False
+        added_field_qid = None
         if request.POST.get('new_field') != None:
             added_field_qid = int(request.POST.get("new_field"))
 
             # User did add field
             if added_field_qid >= 0:
-                q = get_object_or_404(Question, pk=added_field_qid)
-                row = np.zeros(data[0].shape)
-                row[C.iQ] = added_field_qid
-                row[C.iC] = q.category.pk
-                row[C.iS] = True
-                row[C.iO] = np.max(data[:,C.iO])+1
-                row[C.iU] = False if q.unit in ["", " "] else True
-                row[C.iI] = False if q.info_text in ["", " "] else True
-                data = np.vstack([data,row])
+                added_q = get_object_or_404(Question, pk=added_field_qid)
+                if (len(data)>0):
+                    if (added_q.pk not in data[:,C.iQ]):
+                        row = np.zeros(data[0].shape)
+                        row[C.iQ] = added_field_qid
+                        row[C.iC] = added_q.category.pk
+                        row[C.iS] = 1
+                        row[C.iV] = 0
+                        row[C.iO] = np.max(data[:,C.iO])+1
+                        row[C.iU] = False if added_q.unit in ["", " "] else True
+                        row[C.iI] = False if added_q.info_text in ["", " "] else True
+                        data = np.vstack([data,row])
 
-                # Sort data again
-                idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
-                data = data[idx]
+                        # Sort data again
+                        idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
+                        data = data[idx]
 
-                # Update first and last bools
-                data = H.get_first_and_last(data)
+                        # Update first and last bools
+                        data = H.get_first_and_last(data)
+
+                    # page was refreshed after adding a new question
+                    else:
+                        refresh_add = True
+
+                # if data was empty
+                else:
+                    data = np.zeros((1,C.columns))
+                    data[0,C.iQ] = added_field_qid
+                    data[0,C.iC] = added_q.category.pk
+                    data[0,C.iS] = 1
+                    data[0,C.iO] = 0
+                    data[0,C.iV] = 0
+                    data[0,C.iF] = 1
+                    data[0,C.iL] = 1
+                    data[0,C.iU] = False if added_q.unit in ["", " "] else True
+                    data[0,C.iI] = False if added_q.info_text in ["", " "] else True
 
         # Read added Category
         print(request.POST.get("new_cat"))
@@ -210,24 +249,8 @@ def fill_event_template(request, session_id):
 
         ## Process User input
 
-        # User pressed enter key
-        if request.POST.get("enter"):
-            print("enter")
-
-            # save entered values
-            request.session[session_id]['user_data'] = data.tolist()
-            request.session[session_id]['nu_of_ppl'] = nu_of_ppl
-            request.session[session_id]['event_name'] = event_name
-
-            if can_submit:
-                # Move on to next page
-                return HttpResponseRedirect(f'/rechner/result{session_id}')
-            else:
-                pass
-
-
-        # User pressed "submit" button
-        if request.POST.get("submit form"):
+        # User pressed enter key or pressed submit button
+        if request.POST.get("enter") or request.POST.get("submit form"):
             print("submit")
 
             # save entered values
@@ -257,8 +280,9 @@ def fill_event_template(request, session_id):
 
     # Get model objects from IDs in numpy array
     q_list = []
-    for qid in data[:,C.iQ]:
-        q_list.append(get_object_or_404(Question, pk=int(qid)))
+    if len(data)>0:
+        for qid in data[:,C.iQ]:
+            q_list.append(get_object_or_404(Question, pk=int(qid)))
 
     misscats_list = []
     for mcid in missing_cats:
@@ -269,10 +293,15 @@ def fill_event_template(request, session_id):
         missqs_list.append(get_object_or_404(Question, pk=mqid))
 
     # create context dict
-    scale = ["checked" if d else "" for d in data[:,C.iS]]
+    if len(data)>0:
+        scale = ["checked" if d else "" for d in data[:,C.iS]]
+        q_v_f_l_u_i_and_s = zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU],data[:,C.iI],scale)
+    else:
+        scale = []
+        q_v_f_l_u_i_and_s = None
     context = {
         'template_instance':event_template,
-        'q_v_f_l_u_i_and_s':zip(q_list,data[:,C.iV],data[:,C.iF],data[:,C.iL],data[:,C.iU],data[:,C.iI],scale),
+        'q_v_f_l_u_i_and_s':q_v_f_l_u_i_and_s,
         'missing_qs':missqs_list,
         'missing_cats': misscats_list,
         'cat_added':added_cat,
