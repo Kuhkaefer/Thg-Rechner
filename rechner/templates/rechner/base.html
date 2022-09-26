@@ -163,6 +163,9 @@
           top: 110%;
           font-size: 14;
           font-weight:lighter;
+          border-color: #6495ED;
+          border-width: thin;
+          border-style: solid;
         }
 
         .hovertext:hover:before {
@@ -193,7 +196,7 @@
         .dropdown-content {
            display: none;
            position: absolute;
-           background-color: #f1f1f1;
+           background-color:  #e2ffd3;
            z-index: 1;
            border-color: var(--green);
            border-width: thin;
@@ -202,6 +205,7 @@
            padding: 4px 6px;
            font-size: 14;
            cursor:pointer;
+           top:99%;
         }
 
         .left {
@@ -218,14 +222,14 @@
           border-radius:0px;
           border-style: none;
           border-width: thin;
-          border-color: grey;
+          /* border-color: grey; */
           text-align: left;
           cursor:pointer;
-          /* background-color: lightgrey; */
+          background-color: #e2ffd3;
         }
 
         /* Change color of dropdown links on hover */
-        .dropdown-content option:hover {background-color: white;}
+        .dropdown-content button:hover {background-color:  #d1e9c4 ;}
 
         /* Show the dropdown menu on hover */
         .dropdown:hover .dropdown-content {display: block;}
@@ -260,6 +264,29 @@
             margin-left: 0;
         }
         div { word-wrap: break-word }
+
+        table, th, td {
+          /* border: 1px solid black; */
+          border-collapse: collapse;
+        }
+        .calculator br {display:none;width:0;}
+        .calculator tr td.br {display:none}
+        .calculator tr th.br {display:none}
+
+        @media all and (max-width:768px) {
+          .calculator tr {display: table;width:100%;}
+          .calculator td {width:100%;}
+          .calculator th {width:100%;}
+          .calculator tr td.br {display:table-row;}
+          .calculator tr th.br {display:table-row;}
+        }
+
+
+        .my_input {max-width:100px;}
+        @media all and (max-width:1000px) {
+          .my_input {max-width:50px;}
+        }
+
     </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">

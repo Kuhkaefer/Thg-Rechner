@@ -26,7 +26,7 @@ SECRET_KEY = 'k93=h@(5%kd+l1i(ua2v2a!=ejl!hkcjy3z1(td&79@fsnnieq'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['klimarina.ddns.net','127.0.0.1']
+ALLOWED_HOSTS = ['klimarina.ddns.net','127.0.0.1', '192.168.47.67']
 
 
 # Application definition
