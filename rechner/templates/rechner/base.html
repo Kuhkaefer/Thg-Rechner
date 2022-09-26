@@ -65,6 +65,7 @@
         }
         .green_button:hover {
             background-color: var(--green);
+            cursor:pointer;
         }
         .red_button {
             background-color: white; /* Filling */
@@ -74,6 +75,7 @@
         }
         .red_button:hover {
             background-color: var(--red);
+            cursor:pointer;
         }
         .orange_button {
             background-color: white; /* Filling */
@@ -83,6 +85,7 @@
         }
         .orange_button:hover {
             background-color: var(--orange);
+            cursor:pointer;
         }
 
         .ar_btn {
@@ -101,6 +104,7 @@
         .remove_btn:hover {
             background-color: var(--red);
             color: white; /* All */
+            cursor:pointer;
         }
 
         .add_btn {
@@ -110,6 +114,7 @@
         .add_btn:hover {
             background-color: var(--green);
             color: white; /* All */
+            cursor:pointer;
         }
 
         .info_btn {
@@ -117,7 +122,7 @@
           border: 1px solid;
           border-radius: 50%;
           padding-top: 1px;
-          border-color: lightblue;
+          border-color: #6495ED;
           width: 20px;
           height: 20px;
           text-align: center;
@@ -128,28 +133,64 @@
         .info_btn:hover {
             background-color: lightblue;
             /* color: white; /* All */ */
-            border-color: #6495ED;
+            border-color:  lightblue;
+            cursor:pointer;
+            color:white;
         }
 
         /* Dropdown Content (Hidden by Default) */
-        .info-content {
-           display: none;
+        /* .info-content:before {
+           content: attr(data-hover);
+           visibility: hidden;
+           opacity: 0;
+           max-width: 240px;
            position: absolute;
            background-color: #f1f1f1;
            z-index: 1;
            border-color: lightblue;
            border-width: thin;
            border-style: solid;
-           max-width:300px;
            line-break: auto;
-           /* min-width: 160px;
-           max-width: 300px; */
            padding: 4px 6px;
            font-size: 14;
+           transition: opacity 0.1s ease-in-out;
+           left: 0;
+           top: 110%;
+        } */
+
+        .hovertext {
+          position: relative;
+          /* border-bottom: 1px dotted black; */
+        }
+
+        .hovertext:before {
+          content: attr(data-hover);
+          visibility: hidden;
+          opacity: 0;
+          max-width: 340px;
+          min-width: 100px;
+          background-color: lightblue;
+          color:  #154360 ;
+          text-align: left;
+          /* border-radius: 0px; */
+          padding: 5px 5px;
+          transition: opacity 0.1s ease-in-out;
+          position: absolute;
+          z-index: 1;
+          left: auto;
+          right: 20%;
+          top: 110%;
+          font-size: 14;
+          font-weight:lighter;
+        }
+
+        .hovertext:hover:before {
+          opacity: 1;
+          visibility: visible;
         }
 
         /* Show the dropdown menu on hover */
-        .dropdown:hover .info-content {display: block;}
+        /* .dropdown:hover .info-content {display: block;} */
 
         /* Dropdown Button */
         .dropbtn {
@@ -184,6 +225,13 @@
            max-width: 300px; */
            padding: 4px 6px;
            font-size: 14;
+           left:auto;
+           cursor:pointer;
+        }
+
+        .left {
+          left:auto;
+          right:0;
         }
 
         .dropdown-content button {
@@ -197,6 +245,7 @@
           border-width: thin;
           border-color: grey;
           text-align: left;
+          cursor:pointer;
           /* background-color: lightgrey; */
         }
 
@@ -211,7 +260,8 @@
           background-color: var(--green);
           border-radius: 0px;
           border-style: solid;
-          border-width:thin;}
+          border-width:thin;
+          cursor:pointer;}
 
         #q_table {
           border-collapse: collapse;

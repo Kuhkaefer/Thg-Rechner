@@ -59,7 +59,7 @@
                       <th style="font-weight:normal;color:grey;font-size:16;text-align:center">
                          <br>Menge</br>
                        </th>
-                      <th style="font-weight:normal;color:grey;font-size:16;text-align:center">
+                      <th style="font-weight:normal;color:grey;font-size:16;text-align:center" title="Mit Teilnehmendenzahl skalieren">
                         <br>·TN</br>
                       </th>
                       <th style="font-weight:normal;color:grey;font-size:16;text-align:center" class="hide">
@@ -86,8 +86,13 @@
 <!--          Info Hint -->
                     <td>
                       {% if has_info %}
-                       <div class="ar_btn info_btn" style="font-size:14" title="{{ q.info_text }} ">i</div>
+                       <!-- <div class="ar_btn info_btn" style="font-size:14" title="{{ q.info_text }} ">i</div> -->
 
+                       <!-- <body> -->
+                         <!-- <span class="hovertext" data-hover="{{ q.info_text }}"> -->
+                             <div class="ar_btn info_btn hovertext" data-hover="{{ q.info_text }}" style="font-size:14;font-weight:bold">i</div>
+                         <!-- </span> -->
+                       <!-- </body> -->
 
                       <!-- <i class="fa-solid fa-circle-info"></i> -->
                             <!-- <div class = "myDIV" style="float:right;text-align:right"> (info) </div>
@@ -96,7 +101,7 @@
                              <!-- <div class="dropdown">
                              <div class="ar_btn info_btn" style="font-size:14">i</div>
                              <div class="info-content" >
-                               <option name="info-text"> {{ q.info_text }} </option>
+                               <option name="info-text" width=100px> {{ q.info_text }} </option>
                              </div>
                             </div> -->
                       {% endif %}
@@ -112,7 +117,7 @@
                       <td>
                       <div class="dropdown">
                        <div class="ar_btn add_btn">+</div>
-                       <div class="dropdown-content" >
+                       <div class="dropdown-content left" >
                          {% for add_q in missing_qs %}
                            {% if add_q.category == q.category %}
                              <button type='submit' name="new_field" value={{add_q.id}}> {{ add_q.name }} </button>

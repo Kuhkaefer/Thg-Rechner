@@ -24,9 +24,11 @@ class CFactorsInline(admin.TabularInline):
     autocomplete_fields = ['emission']
     extra=6
     readonly_fields=('pk',)
+    search_fields = ['name']
 
 @admin.register(EmissionFactor)
 class EFactorsInline(admin.ModelAdmin):
+    search_fields = ['name']
     autocomplete_fields = ['source']
     readonly_fields=('pk',)
     list_display = ["name", "pk", "unit", "value"]
@@ -41,6 +43,7 @@ class DefaultAmountsInline(admin.TabularInline):
 
 @admin.register(EventTemplate)
 class EventTemplateAdmin(admin.ModelAdmin):
+    search_fields = ['name']
     inlines = [DefaultAmountsInline]
     readonly_fields=('pk',)
     list_display = ["name", "pk"]

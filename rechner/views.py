@@ -95,7 +95,8 @@ def fill_event_template(request, session_id):
         # get question, default value, category and more
         # all questions
         if event_template.name=="Alle":
-            data = np.zeros((len(Question.objects.all())-1, C.columns))
+            data = np.zeros((len(Question.objects.all()), C.columns))
+            c_names = []
             i = 0
             for question in Question.objects.all():
                 data[i,C.iQ] = question.pk
@@ -105,12 +106,14 @@ def fill_event_template(request, session_id):
                 data[i,C.iI] = False if question.info_text in ["", " "] else True
                 data[i,C.iO] = i
                 data[i,C.iV] = 0
+                c_names.append(question.category.name)
                 i += 1
             del i
         # normal event template
         else:
             def_amnts = event_template.defaultamount_set.all()
             data = np.zeros((len(def_amnts), C.columns))
+            c_names = []
             i = 0
             for df in def_amnts:
                 data[i,C.iQ] = df.question.pk
@@ -120,11 +123,13 @@ def fill_event_template(request, session_id):
                 data[i,C.iU] = False if df.question.unit in ["", " "] else True
                 data[i,C.iI] = False if df.question.info_text in ["", " "] else True
                 data[i,C.iO] = i
+                c_names.append(df.question.category.name)
                 i += 1
             del i
 
         # sort by category and order
-        idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
+
+        idx = np.lexsort((data[:,C.iO],c_names))
         data = data[idx]
 
         # get first and last bools
