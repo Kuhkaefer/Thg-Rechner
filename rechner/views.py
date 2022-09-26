@@ -245,7 +245,10 @@ def fill_event_template(request, session_id):
             new_c_q_list = None
 
         # Read deleted field and delete it
+        print("diesdas")
+        print(request.POST.get('remove_field'))
         if request.POST.get('remove_field')!=None:
+            print("field removed")
             data = np.delete(data, obj=np.argwhere(data[:,C.iQ]==float(request.POST.get('remove_field'))),axis=0)
 
             # Update first and last bools

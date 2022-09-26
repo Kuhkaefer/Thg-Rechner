@@ -33,20 +33,26 @@
 
     <p> </p>
 
-    <form action="" method="POST"> {% csrf_token %}
+    <form action="" method="POST" name="user-answers"> {% csrf_token %}
         <table id="q_table" style="width:100%">
-            <tr><th style="text-align:left">Allgemein</th></tr>
             <tr>
+              <td> &nbsp;&nbsp;&nbsp;</td>
+              <th style="text-align:left">Allgemein</th>
+            </tr>
+            <tr>
+                <td></td>
                 <td colspan="1"> Name der Veranstaltung: </td>
-                <td colspan="4" class="br">
+                <td colspan="4">
                   {% autoescape off %}
                   <input type="text" name="event_name" maxlength="100" size="17" required value={{event_name}}>
                   {% endautoescape %}
                 </td>
+                <td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
             </tr>
           <tr>
+              <td></td>
               <td colspan="1"> Anzahl der Teilnehmenden (TN): </td>
-              <td>
+              <td style="text-align:center">
                 <input name="TNs" maxlength="18" size="5" required value={{TNs}} type="number" inputmode="decimal" min="0" step="1" class="my_input">
               </td>
           </tr>
@@ -55,6 +61,7 @@
 <!--          Show category -->
                 {% if first %}
                     <tr>
+                      <th></th>
                       <th style="text-align:left" colspan="1">
                         <br>{{q.category}}</br>
                       </th>
@@ -74,18 +81,30 @@
 
 <!--          List questions -->
                 <tr>
+                    <td></td>
                     <td><li>{{q.question_text }} {% if has_unit %} [{{q.unit}}] {% endif %} </li></td>
-                    <td>
+                    <td style="text-align:center">
                         <input id="id_subject"  name={{q.id}} maxlength="20"
-                               size="5" required value={{d}} type="number" inputmode="decimal" lang="en" min="0" step="any" class="my_input">
+                               size="5" style="text-align:center" required value={{d}} type="number" inputmode="decimal"
+                               lang="en" min="0" step="any" class="my_input">
                     </td>
                     <td style="text-align:center">
                         <input type="checkbox" name="scale{{q.id}}" {{scale}} style="float:center;text-align:center">
                     </td>
                     <td>
-                            <button type='submit' name="enter" value=1 hidden="hidden">-</button>
-                            <button type='submit' name="remove_field" value={{q.id}}
-                              class="ar_btn remove_btn"><b>-</b></button>
+                            <!-- <div type='submit' name="enter" value=1 hidden="hidden">-</div>
+                            <div type='submit' name="remove_field" value={{q.id}}
+                              class="ar_btn remove_btn"><b>-</b></div> -->
+                            <!-- <div style="display: inline-block"> <!-- class="ar_btn remove_btn">-->
+                        <!-- <div type="" name="remove_field"
+                                class="ar_btn remove_btn" onClick="document.forms['user-answers'].submit(value={{q.pk}});">-
+                        </div> -->
+                        <!-- <div style="width: 20px;">
+                            <button style="width=100%" type='submit' name="remove_field" value={{q.id}} class="ar_btn remove_btn">-</button>
+                        </div> -->
+
+                      <button type='submit'>-</button>
+                            <!-- </div> -->
                     </td>
 <!--          Info Hint -->
                     <td>
@@ -94,7 +113,8 @@
 
                        <!-- <body> -->
                          <!-- <span class="hovertext" data-hover="{{ q.info_text }}"> -->
-                             <div class="ar_btn info_btn hovertext" data-hover="{{ q.info_text }}" style="font-size:14;font-weight:bold">i</div>
+                         <div class="ar_btn info_btn hovertext" data-hover="{{ q.info_text }}"
+                          style="font-size:14;font-weight:bold;float:right" >i</div>
                          <!-- </span> -->
                        <!-- </body> -->
 
@@ -117,20 +137,18 @@
 <!--              Option to add question -->
                 {% if last %}
                     <tr>
-                      <td ></td>
-                      <td class="br" colspan="1"></td>
-                      <td ></td>
+                      <td colspan="4"></td>
                       <td>
-                      <div class="dropdown">
-                       <div class="ar_btn add_btn">+</div>
-                       <div class="dropdown-content left" >
-                         {% for add_q in missing_qs %}
-                           {% if add_q.category == q.category %}
-                             <button type='submit' name="new_field" value={{add_q.id}}> {{ add_q.name }} </button>
-                           {% endif %}
-                         {% endfor %}
-                       </div>
-                      </div>
+                        <div class="dropdown">
+                         <div class="ar_btn add_btn">+</div>
+                         <div class="dropdown-content left" >
+                           {% for add_q in missing_qs %}
+                             {% if add_q.category == q.category %}
+                               <button type='submit' name="new_field" value={{add_q.id}}> {{ add_q.name }} </button>
+                             {% endif %}
+                           {% endfor %}
+                         </div>
+                        </div>
                       </td>
                     </tr>
 
@@ -141,6 +159,8 @@
 
 <!--      Option to add question of new category -->
             <tr>
+
+              <td> </td>
               <td colspan="1">
                 <div class="dropdown">
                  <div class="dropbtn" style="font-weight:bold">Neue Kategorie:</div>
@@ -154,8 +174,9 @@
             </tr>
             {% if cat_added != None %}
                 <tr>
+                  <td> </td>
                   <td colspan="1" style="font-size:16"> Neuer Posten aus {{cat_added}}: </td>
-                  <td colspan="2" class="br"> </td>
+                  <td colspan="2"> </td>
                   <td colspan="1">
                     <div class="dropdown">
                      <div class="ar_btn add_btn" >+</div>
