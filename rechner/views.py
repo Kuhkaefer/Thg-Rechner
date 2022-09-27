@@ -450,9 +450,11 @@ def result(request, session_id):
     # total relative reduction
     if np.any(reduction_df):
         reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
-    total_reduction = reduction_df.groupby("Feld").first().loc[:,"Abs. Reduktion [kg]"].sum()
-    total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
-
+        total_reduction = reduction_df.groupby("Feld").first().loc[:,"Abs. Reduktion [kg]"].sum()
+        total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
+    else:
+        total_reduction = 0
+        total_relative_reduction = 0
     ## Create output table
     # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
     # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
