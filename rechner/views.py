@@ -15,7 +15,6 @@ from rechner import constants as C
 ## Index Seite (Choose Eventtemplate)
 def index(request):
 
-
     if request.method == "POST":
 
         # generate ID for Session
@@ -161,6 +160,7 @@ def fill_event_template(request, session_id):
         # Read entered values
         if len(data)>0:
             for j,q in enumerate(data[:,C.iQ]):
+
                 # freshly added field & page reloaded
                 if request.POST.get('new_field') != None:
                     added_field_qid = int(request.POST.get("new_field"))
@@ -189,6 +189,7 @@ def fill_event_template(request, session_id):
         refresh_add = False
         added_field_qid = None
         if request.POST.get('new_field') != None:
+            print("field added")
             added_field_qid = int(request.POST.get("new_field"))
 
             # User did add field
@@ -204,11 +205,15 @@ def fill_event_template(request, session_id):
                         row[C.iO] = np.max(data[:,C.iO])+1
                         row[C.iU] = False if added_q.unit in ["", " "] else True
                         row[C.iI] = False if added_q.info_text in ["", " "] else True
-                        data = np.vstack([data,row])
 
-                        # Sort data again
-                        idx = np.lexsort((data[:,C.iO],data[:,C.iC]))
-                        data = data[idx]
+                        # insert into data array
+                        if row[C.iC] in data[:,C.iC]:
+                            idx = np.max(np.where(data[:,C.iC]==row[C.iC]))
+                        else:
+                            # cnames=list(Categories.objects.filter(pk__in=np.unique(data[:,C.iC])).values_list("name",flat=True))
+                            idx = len(data)-1
+
+                        data=np.insert(data.T,idx+1,row,axis=1).T
 
                         # Update first and last bools
                         data = H.get_first_and_last(data)
@@ -231,8 +236,8 @@ def fill_event_template(request, session_id):
                     data[0,C.iI] = False if added_q.info_text in ["", " "] else True
 
         # Read added Category
-        print(request.POST.get("new_cat"))
         if request.POST.get('new_cat')!=None:
+            print("category added")
             added_cat_id = int(request.POST.get("new_cat"))
             if (added_cat_id >= 0):
                 added_cat = get_object_or_404(Category,pk=added_cat_id)
@@ -245,8 +250,6 @@ def fill_event_template(request, session_id):
             new_c_q_list = None
 
         # Read deleted field and delete it
-        print("diesdas")
-        print(request.POST.get('remove_field'))
         if request.POST.get('remove_field')!=None:
             print("field removed")
             data = np.delete(data, obj=np.argwhere(data[:,C.iQ]==float(request.POST.get('remove_field'))),axis=0)
@@ -466,7 +469,8 @@ def result(request, session_id):
 
     # pie chart
     fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
-                    values="CO2 gesamt", color="Kategorie", width=400, height=300))
+                    values="CO2 gesamt", color="Kategorie", width=400, height=300,
+                    color_discrete_map=C.colors))
 
     fig.update_layout(legend = {'title_text':'Kategorie','x' : 1.1, 'y':0.6, 'yanchor':'middle'},
                       margin=go.layout.Margin(
@@ -483,7 +487,8 @@ def result(request, session_id):
     # horizontal bars
     fig = go.Figure(px.bar(table,x="CO2 gesamt",y="Produkt", orientation="h",
                            width=400, height=20*table.shape[0],color="Kategorie",
-                           labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","Produkt":""}))
+                           labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","Produkt":""},
+                           color_discrete_map=C.colors))
     fig.update_layout(yaxis={'categoryorder':'total ascending','title_font_size':1},
                       xaxis={"showgrid":True,"gridcolor":"grey"},
                       margin=go.layout.Margin(
