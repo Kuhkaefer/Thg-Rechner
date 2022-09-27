@@ -11,6 +11,7 @@ import plotly.io as pio
 from plotly.offline import plot
 from rechner import helpers as H
 from rechner import constants as C
+import ast
 
 ## Index Seite (Choose Eventtemplate)
 def index(request):
@@ -364,6 +365,7 @@ def result(request, session_id):
             result_df.loc[i,"Einheit"] = emi.unit
             result_df.loc[i,"·TN"] = bool(entry[C.iS])
             result_df.loc[i,"Anmerkung"] = emi.explanation
+            result_df.loc[i,"Quelle"] = str(list(emi.source.all().values_list("pk",flat=True)))
 
             # calculate emission
             result_df.loc[i,"CO2/St."], result_df.loc[i,"Menge"], result_df.loc[i,"CO2 gesamt"] =\
@@ -444,7 +446,7 @@ def result(request, session_id):
             # save to result_df
             reduction_df.loc[c,"Option"] = advice_text
             reduction_df.loc[c,"Abs. Reduktion [kg]"] = reduction
-            reduction_df.loc[c,"Rel. Gesamt-Reduktion [%]"] = round(relative_reduction*100)/100
+            reduction_df.loc[c,"Rel. Reduktion [%]"] = round(relative_reduction*100)/100
             reduction_df.loc[c,"Feld"] = advice.user_q.name
             reduction_df.loc[c,"Produkt-Nr."] = str(idx)
             reduction_df.loc[c,"Hinweis"] = advice.info
@@ -485,20 +487,38 @@ def result(request, session_id):
     pie_chart = plot(fig, output_type='div')
 
     # horizontal bars
-    fig = go.Figure(px.bar(table,x="CO2 gesamt",y="Produkt", orientation="h",
-                           width=400, height=20*table.shape[0],color="Kategorie",
-                           labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","Produkt":""},
-                           color_discrete_map=C.colors))
-    fig.update_layout(yaxis={'categoryorder':'total ascending','title_font_size':1},
-                      xaxis={"showgrid":True,"gridcolor":"grey"},
+    print(table)
+    for i in range(len(table)):
+        row = table.loc[i,:]
+        print(row)
+        tn = " pro TN" if row["·TN"] else ""
+        source = ast.literal_eval(row['Quelle'])
+        if len(source)==0:
+            source=""
+        # elif len(source)==1:
+        #     source = f'[]<a href="/source">{source[0]}</a>]'
+        else:
+            source = [f'<a href="/rechner/source/{s}">{s}</a>' for s in source]
+            source = f"[{', '.join(source)}]"
+        table.loc[i,"fullname"] = f' <b>{row["Produkt"]}</b> ({row["Menge"].round(3)}{row["Einheit"]} {tn}) {source}'
+    print(table["Quelle"])
+
+    fig = go.Figure(px.bar(table,x="CO2 gesamt",y="fullname", orientation="h",
+                           width=400, height=20*table.shape[0]+75,color="Kategorie",
+                           labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","fullname":""},
+                           color_discrete_map=C.colors,custom_data=table))
+    fig.update_layout(yaxis={'categoryorder':'total ascending','title_font_size':1,
+                             'side':'right'},
+                      xaxis={"showgrid":True,"gridcolor":"grey","autorange" : "reversed"},
                       margin=go.layout.Margin(
                         l=0, #left margin
                         r=0, #right margin
-                        b=0, #bottom margin
-                        t=25, #top margin
+                        b=40, #bottom margin
+                        t=30, #top margin
                       ),
                       plot_bgcolor='rgba(0,0,0,0)')
-    fig.update_traces(showlegend=False)
+    fig.update_traces(showlegend=False,
+                      hovertemplate="Feld: %{customdata[1]}<br>%{value} kg")
     bar_chart = plot(fig, output_type='div')
 
     # Create output
@@ -508,6 +528,10 @@ def result(request, session_id):
         'page_description': f'',
         'table' : table.to_html(),
         'reduction_table' : reduction_df.to_html(),
+        'op_red' : zip(reduction_df.Option,
+                       reduction_df["Rel. Reduktion [%]"].round(3),
+                       reduction_df["Abs. Reduktion [kg]"].round(3)),
+        'loops' : len(reduction_df),
         'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(2),
         'pie':pie_chart,
         'bars':bar_chart,
