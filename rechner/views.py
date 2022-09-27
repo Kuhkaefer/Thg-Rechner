@@ -428,7 +428,7 @@ def result(request, session_id):
 
                 # if different question suggested:
                 if has_new_q:
-                    advice_text +=  f"Ersetze '{advice.user_q.name}' mit '{advice.suggested_q.name}'. "
+                    advice_text +=  f'Ersetze "{advice.user_q.name}" mit "{advice.suggested_q.name}"'
 
                 # if different value suggested:
                 if has_new_v:
@@ -437,9 +437,9 @@ def result(request, session_id):
                     else:
                         direction = "Erhöhe"
                     if has_new_q:
-                        advice_text +=  f"{direction} '{advice.suggested_q.name}' auf {new_v}. "
+                        advice_text +=  f'{direction} "{advice.suggested_q.name}" auf {new_v*100} %'
                     else:
-                        advice_text +=  f"{direction} '{advice.user_q.name}' auf {new_v}. "
+                        advice_text +=  f'{direction} "{advice.user_q.name}" auf {new_v*100} %'
 
                 # Result
                 # advice_text +=  f"Resultat: {reduction:+.3f} kg ({relative_reduction:+.2f} %). "
@@ -452,6 +452,10 @@ def result(request, session_id):
             reduction_df.loc[c,"Hinweis"] = advice.info
             c+=1
 
+    # filter out minor reductions
+    # large_red = reduction_df["Abs. Reduktion [kg]"] < 0.05*reduction_df["Abs. Reduktion [kg]"].min()
+    # reduction_df = reduction_df[large_red.values].reset_index(drop=True)
+
     # total relative reduction
     if np.any(reduction_df):
         reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
@@ -460,73 +464,90 @@ def result(request, session_id):
     else:
         total_reduction = 0
         total_relative_reduction = 0
-    ## Create output table
-    # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
-    # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
 
-    # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
-    table = result_df.sort_values(["CO2 gesamt"], ascending=False)
+    ### Plot result
 
-    ## Plot result
-
-    # pie chart
+    ## pie chart
     fig = go.Figure(px.pie(H.sum_per(result_df, "Kategorie"), names="Kategorie",
-                    values="CO2 gesamt", color="Kategorie", width=400, height=300,
+                    values="CO2 gesamt", color="Kategorie", width=500, height=300,
                     color_discrete_map=C.colors))
 
     fig.update_layout(legend = {'title_text':'Kategorie','x' : 1.1, 'y':0.6, 'yanchor':'middle'},
                       margin=go.layout.Margin(
-                        l=0, #left margin
-                        r=0, #right margin
+                        l=20, #left margin
+                        r=20, #right margin
                         b=0, #bottom margin
                         t=0, #top margin
                       ),
                       yaxis={'ticksuffix':"kg"}
                       )
     fig.update_traces(hovertemplate="%{label}<br>%{value} kg")
-    pie_chart = plot(fig, output_type='div')
+    pie_chart = plot(fig,output_type='div',config={'displayModeBar':False})
 
-    # horizontal bars
-    print(table)
-    for i in range(len(table)):
-        row = table.loc[i,:]
-        print(row)
+    ## horizontal bars
+
+    # Create emission table
+    # df with CO2 sum per question ("Feld"), sorted in descending order by CO2 gesamt:
+    # table = H.sum_per(result_df, "Feld", reset_index=False, sort=True)
+
+    # df with CO2 per Emission, sorted in descending order by CO2 gesamt:
+    em_table = result_df.sort_values(["CO2 gesamt"], ascending=False)
+
+    # filter out minor emissions
+    large_ems = em_table["CO2 gesamt"] > 0.01*em_table["CO2 gesamt"].max()
+    remainder = em_table.loc[~large_ems.values,"CO2 gesamt"].sum()
+    remainding_ems = ", ".join(em_table.loc[~large_ems.values,"Produkt"].tolist())
+    em_table = em_table[large_ems.values].reset_index(drop=True)
+
+    # Create emission names
+    for i,row in em_table.iterrows():
         tn = " pro TN" if row["·TN"] else ""
         source = ast.literal_eval(row['Quelle'])
         if len(source)==0:
             source=""
-        # elif len(source)==1:
-        #     source = f'[]<a href="/source">{source[0]}</a>]'
         else:
             source = [f'<a href="/rechner/source/{s}">{s}</a>' for s in source]
             source = f"[{', '.join(source)}]"
-        table.loc[i,"fullname"] = f' <b>{row["Produkt"]}</b> ({row["Menge"].round(3)}{row["Einheit"]} {tn}) {source}'
-    print(table["Quelle"])
+        em_table.loc[i,"fullname"] = \
+        f' <b>{row["Produkt"]}</b> ({round(row["Menge"]*100)/100}{row["Einheit"]} {tn}) {source}'
 
-    fig = go.Figure(px.bar(table,x="CO2 gesamt",y="fullname", orientation="h",
-                           width=400, height=20*table.shape[0]+75,color="Kategorie",
+    # Add remainder
+    em_table = em_table.append(pd.DataFrame({
+                                "CO2 gesamt":[remainder],
+                                "fullname":[" …Rest…"],
+                                "Kategorie":'Rest',
+                                "Feld":"…"}),ignore_index=True)
+    em_table["CO2 gesamt"] = em_table["CO2 gesamt"].round(2)
+
+
+    # create figure
+    fig = go.Figure(px.bar(em_table,x="CO2 gesamt",y="fullname", orientation="h",
+                           width=560, height=20*em_table.shape[0]+75,color="Kategorie",
                            labels={"CO2 gesamt":"CO<sub>2</sub> [kg]","fullname":""},
-                           color_discrete_map=C.colors,custom_data=table))
-    fig.update_layout(yaxis={'categoryorder':'total ascending','title_font_size':1,
-                             'side':'right'},
+                           color_discrete_map=C.colors,custom_data=em_table,
+                           # category_orders={'index': em_table.index.astype(str)}
+                           ))
+    fig.update_layout(yaxis={'title_font_size':1, 'side':'right',
+                             'categoryorder':'total ascending',
+                             # 'categoryarray':em_table.index
+                             },
                       xaxis={"showgrid":True,"gridcolor":"grey","autorange" : "reversed"},
                       margin=go.layout.Margin(
-                        l=0, #left margin
-                        r=0, #right margin
+                        l=20, #left margin
+                        r=20, #right margin
                         b=40, #bottom margin
                         t=30, #top margin
                       ),
                       plot_bgcolor='rgba(0,0,0,0)')
     fig.update_traces(showlegend=False,
-                      hovertemplate="Feld: %{customdata[1]}<br>%{value} kg")
-    bar_chart = plot(fig, output_type='div')
+                      hovertemplate="Aus: %{customdata[1]}<br>%{value} kg")
+    bar_chart = plot(fig, output_type='div',config={'displayModeBar':False})
 
     # Create output
     context = {
         'page_name':'CO2 Resultat',
         'page_header':f'Ergebnis für "{event_name}"',
         'page_description': f'',
-        'table' : table.to_html(),
         'reduction_table' : reduction_df.to_html(),
         'op_red' : zip(reduction_df.Option,
                        reduction_df["Rel. Reduktion [%]"].round(3),

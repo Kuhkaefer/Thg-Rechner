@@ -21,6 +21,7 @@
 {{ pie }}
 {% endautoescape %}
 
+<p></p>
 <p style="font-size:18"> Aufschlüsselung: </p>
 
 {% autoescape off%}
@@ -31,27 +32,29 @@
 
 <!-- {{table|safe}} -->
 
-<br></br>
-<table padding=10px>
+<p></p>
+<p style="font-size:18">Theoretische Reduktionsmöglichkeiten (bis zu <b>{{total_relative_reduction}} %</b>): </p>
+<table padding=10px width=100% class="reduction">
   <tr>
-    <th></th>
-    <th colspan="3" style="padding-bottom:3px;padding-top:3px;text-align:left">
-      Theoretische Reduktionsmöglichkeiten (bis zu: {{total_relative_reduction}} %)</th>
-  </tr>
-  <tr>
-    <th colspan="2"></th>
-    <th style="padding-bottom:3px;padding-top:3px;text-align:right;font-weight:normal;font-size:16;color:grey">Absolute Einsparung</th>
-    <th style="padding-bottom:3px;padding-top:3px;text-align:right;font-weight:normal;font-size:16;color:grey">Relative Einsparung</th>
+    <th> &nbsp;&nbsp;&nbsp;</th>
+    <th colspan="2" style="padding-bottom:3px;padding-top:3px;text-align:left;font-weight:lighter;font-size:14">Änderung</th>
+    <th style="padding-bottom:3px;padding-top:3px;text-align:right;font-weight:lighter;font-size:14">
+      Absolute Einsparung</th>
+    <th style="padding-bottom:3px;padding-top:3px;text-align:right;font-weight:lighter;font-size:14">
+      Relative Einsparung</th>
+    <th> &nbsp;&nbsp;&nbsp;</th>
   </tr>
   {% for option,rel, abs in op_red %}
     <tr>
-      <td style="padding-bottom:3px;padding-top:3px;font-size:16">·&nbsp;</td>
-      <td style="padding-bottom:3px;padding-top:3px;font-size:16">{{option}}</td>
-      <td style="text-align:right;padding-bottom:3px;padding-top:3px;font-size:16">{{abs}} kg</td>
-      <td style="text-align:right;padding-bottom:3px;padding-top:3px;font-size:16">{{rel}} %</td>
+      <td> &nbsp;&nbsp;&nbsp;</td>
+      <td style="padding-bottom:3px;padding-top:3px;font-size:14">·&nbsp;</td>
+      <td style="padding-bottom:3px;padding-top:3px;font-size:14">{{option}}</td>
+      <td style="text-align:right;padding-bottom:3px;padding-top:3px;font-size:14">{{abs}} kg</td>
+      <td style="text-align:right;padding-bottom:3px;padding-top:3px;font-size:14">{{rel}} %</td>
     </tr>
   {% endfor %}
 </table>
+<br></br>
 <!-- {{reduction_table|safe}} -->
 <!-- <p><b> Theoretisch mögliche Reduktion: {{total_relative_reduction}} %</b></p> -->
 {% endblock %}

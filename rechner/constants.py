@@ -16,8 +16,9 @@ colors = {
     "Verpflegung":"#d62728",
     "Mobilität":"#1f77b4",
     "Unterkunft":"#bcbd22",
-    "Räumlichkeit":"#ff7f0e",
+    "Räumlichkeit":"#B6E880",
     "Technik":"#9467bd",
-    "Sonstiges":"#8c564b",
+    "Sonstige":"#ff7f0e",
     "Materialien + Präsente":"#2ca02c",
+    "Rest":"grey",
 }
