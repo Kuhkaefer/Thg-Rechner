@@ -11,7 +11,10 @@ def get_first_and_last(data):
 
     if len(data)>0:
         _, i_first_unique= np.unique(data[:,C.iC], return_index=True)
-        i_last_unique = np.append(i_first_unique[1:]-1, [len(data[:,C.iC])-1])
+        
+        i_last_unique = i_first_unique-1
+        i_last_unique = i_last_unique[i_last_unique>=0]
+        i_last_unique = np.append(i_last_unique,len(data[:,C.iC])-1)
 
         data[:,[C.iF,C.iL]]        = 0
         data[i_first_unique,C.iF]  = 1
