@@ -45,7 +45,7 @@
                 <td colspan="4">
                   {% autoescape off %}
                   <input type="text" name="event_name" maxlength="100" size="17"
-                   required value={{event_name}} style="float:left">
+                   required value={{event_name}} style="float:left" onkeydown="return event.key != 'Enter';">
                   {% endautoescape %}
                 </td>
                 <td> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
@@ -54,7 +54,9 @@
               <td></td>
               <td colspan="1"> Anzahl der Teilnehmenden (TN): </td>
               <td style="text-align:center">
-                <input name="TNs" maxlength="18" size="5" required value={{TNs}} type="number" inputmode="decimal" min="0" step="1" class="my_input">
+                <input name="TNs" maxlength="18" size="5" required value={{TNs}}
+                 type="number" inputmode="decimal" min="0" step="1" class="my_input"
+                 onkeydown="return event.key != 'Enter';">
               </td>
           </tr>
             {% for q,d,first,last,has_unit,has_info,scale in q_v_f_l_u_i_and_s %}
@@ -87,7 +89,7 @@
                     <td style="text-align:center">
                         <input id="id_subject"  name={{q.id}} maxlength="20"
                                size="5" style="text-align:center" required value={{d}} type="number" inputmode="decimal"
-                               lang="en" min="0" step="any" class="my_input">
+                               lang="en" min="0" step="any" onkeydown="return event.key != 'Enter';" ><!--class="my_input" onkeypress="document.forms['user-answers'].submit()">-->
                     </td>
                     <td style="padding-left:5px">
                         <input type="checkbox" name="scale{{q.id}}" {{scale}} style="float:left">
@@ -103,7 +105,6 @@
                         <!-- <div style="width: 20px;">
                             <button style="width=100%" type='submit' name="remove_field" value={{q.id}} class="ar_btn remove_btn">-</button>
                         </div> -->
-
                       <button class="ar_btn remove_btn" name="remove_field" value={{q.id}} type='submit'>-</button>
                             <!-- </div> -->
                     </td>
