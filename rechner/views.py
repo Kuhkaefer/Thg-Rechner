@@ -428,7 +428,7 @@ def result(request, session_id):
 
                 # if different question suggested:
                 if has_new_q:
-                    advice_text +=  f'Ersetze "{advice.user_q.name}" mit "{advice.suggested_q.name}"'
+                    advice_text +=  f'Ersetze "{advice.user_q.name}" mit "{advice.suggested_q.name}". '
 
                 # if different value suggested:
                 if has_new_v:
@@ -437,9 +437,18 @@ def result(request, session_id):
                     else:
                         direction = "Erhöhe"
                     if has_new_q:
-                        advice_text +=  f'{direction} "{advice.suggested_q.name}" auf {new_v*100} %'
+                        if advice.suggested_q.unit != advice.user_q.unit:
+                            direction = "Ändere"
+                            unit = advice.suggested_q.unit
+                            if user_data[i,C.iS]:
+                                unit += " pro TN"
+                            suggestion = new_v
+                        else:
+                            unit = "%"
+                            suggestion = 100*advice.suggested_f
+                        advice_text +=  f'{direction} "{advice.suggested_q.name}" auf {suggestion:.0f} {unit}. '
                     else:
-                        advice_text +=  f'{direction} "{advice.user_q.name}" auf {new_v*100} %'
+                        advice_text +=  f'{direction} "{advice.user_q.name}" auf {advice.suggested_f*100:.0f} %. '
 
                 # Result
                 # advice_text +=  f"Resultat: {reduction:+.3f} kg ({relative_reduction:+.2f} %). "
