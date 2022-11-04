@@ -1,21 +1,30 @@
 {% extends 'rechner/base.html' %}
 
 {% block title %}
+{% autoescape off%}
 {{page_name}}
+{% endautoescape %}
 {% endblock %}
 
 
 {% block header %}
+{% autoescape off%}
     {{page_header}}
+    {% endautoescape %}
 {% endblock %}
 
 
 {% block description %}
+{% autoescape off%}
 <p> {{page_description}} </p>
+{% endautoescape %}
 {% endblock %}
 
 {% block content %}
+
+{% autoescape off%}
 <p> {{page_content}} </p>
+{% endautoescape %}
 
 {% endblock %}
 

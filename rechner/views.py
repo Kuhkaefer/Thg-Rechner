@@ -54,7 +54,7 @@ def index(request):
     # create context
     context = {
         'page_name':'Klimarina',
-        'page_header':'CO<sub>2</sub> Rechner',
+        'page_header':'CO<sub>2</sub>-Rechner',
         'page_text':"Wähle ein Veranstaltungsformat als Vorlage:",
         'event_templates':EventTemplate.objects.all(),
         'button_link':'/rechner',
