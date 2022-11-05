@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Category, Emission, Question, EventTemplate, DefaultAmount, \
-Source, CalculationFactor, EmissionFactor, Advice
+Source, CalculationFactor, EmissionFactor, Advice, Stats
 from django.db.models.functions import Lower
 
 
@@ -75,3 +75,12 @@ class AdviceAdmin(admin.ModelAdmin):
     search_fields = ["user_q__name"]
     def get_ordering(self, request):
         return [Lower('user_q__name'),Lower('suggested_q__name')]
+
+
+@admin.register(Stats)
+class SourceAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+    list_display = ["name", "count"]
+    readonly_fields=('count',)
+    def get_ordering(self, request):
+        return [Lower('name')]

@@ -1,8 +1,15 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from django.http import HttpResponse
+from rechner.models import Stats
 
 
 def home(request):
+
+    # count landing
+    calculations = get_object_or_404(Stats,name="home_landing")
+    calculations.count += 1
+    calculations.save()
+
     context = {
         'page_name':'Klimarina',
         'page_header':'Klimarina: Der CO<sub>2</sub>-Rechner für die jDPG',
@@ -15,6 +22,11 @@ def home(request):
 
 
 def info(request):
+
+    # count landing
+    calculations = get_object_or_404(Stats,name="info_landing")
+    calculations.count += 1
+    calculations.save()
 
     content = 'Klimarina ist ein Projekt des Arbeitsteams Nachhaltigkeit der jungen Deutschen \
                 Physikalischen Gesellschaft (jDPG).<br>Mit unserem Treibhausgasrechner möchten wir eine \

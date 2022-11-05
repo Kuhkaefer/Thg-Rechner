@@ -217,3 +217,16 @@ class Advice(models.Model):
         else:
             temp_name = f"Klimatipp für {self.user_q}"
         return temp_name
+
+class Stats(models.Model):
+
+    name  =  models.CharField(max_length=100, unique=True)
+    count = models.IntegerField(default=0)
+
+    # fix plural
+    class Meta:
+        verbose_name_plural = "Stats"
+
+    # Representation
+    def __str__(self):
+        return f"{self.name}: {self.count}"

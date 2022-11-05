@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, get_list_or_404
 from .models import EventTemplate, Question, DefaultAmount, Category, \
-                    CalculationFactor, Advice, Source
+                    CalculationFactor, Advice, Source, Stats
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 import numpy as np
@@ -35,6 +35,12 @@ def index(request):
 
         # valid choice
         else:
+
+            # count session
+            calculations = get_object_or_404(Stats,name="calculations")
+            calculations.count += 1
+            calculations.save()
+
             request.session[session_id]["template_id"] = choice
 
             # get number of participants
@@ -332,6 +338,11 @@ def fill_event_template(request, session_id):
 ## Ergebnis Seite
 def result(request, session_id):
 
+    # count landing
+    calculations = get_object_or_404(Stats,name="result_landing")
+    calculations.count += 1
+    calculations.save()
+
     # Chosen Event-Template
     event_template = request.session[session_id]['event_template_id']
 
@@ -470,9 +481,14 @@ def result(request, session_id):
         reduction_df.sort_values("Abs. Reduktion [kg]", inplace=True)
         total_reduction = reduction_df.groupby("Feld").first().loc[:,"Abs. Reduktion [kg]"].sum()
         total_relative_reduction = total_reduction/result_df.loc[:,"CO2 gesamt"].sum()*100
+        op_reduction = zip(reduction_df.Option,
+                       reduction_df["Rel. Reduktion [%]"].round(3),
+                       reduction_df["Abs. Reduktion [kg]"].round(3))
     else:
         total_reduction = 0
         total_relative_reduction = 0
+        op_reduction = None
+
 
     ### Plot result
 
@@ -558,9 +574,7 @@ def result(request, session_id):
         'page_header':f'Ergebnis für "{event_name}"',
         'page_description': f'',
         'reduction_table' : reduction_df.to_html(),
-        'op_red' : zip(reduction_df.Option,
-                       reduction_df["Rel. Reduktion [%]"].round(3),
-                       reduction_df["Abs. Reduktion [kg]"].round(3)),
+        'op_red' : op_reduction,
         'loops' : len(reduction_df),
         'co2_sum' : result_df.loc[:,"CO2 gesamt"].sum().round(2),
         'pie':pie_chart,
