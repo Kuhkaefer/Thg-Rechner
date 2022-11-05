@@ -81,6 +81,5 @@ class AdviceAdmin(admin.ModelAdmin):
 class SourceAdmin(admin.ModelAdmin):
     search_fields = ["name"]
     list_display = ["name", "count"]
-    readonly_fields=('count',)
     def get_ordering(self, request):
         return [Lower('name')]
