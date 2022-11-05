@@ -13,7 +13,7 @@ def home(request):
     context = {
         'page_name':'Klimarina',
         'page_header':'Klimarina: Der CO<sub>2</sub>-Rechner für die jDPG',
-        'page_description':'Berechne die CO2-Emissionen, die für deine jDPG-Veranstaltung anfallen:',
+        'page_description':'Berechne die CO<sub>2</sub>-Emissionen, die für deine jDPG-Veranstaltung anfallen:',
         'button_link':'rechner',
         'button_text':'Zum Rechner'
         }
