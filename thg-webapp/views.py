@@ -33,8 +33,7 @@ def info(request):
                 einfache Abschätzung der Treibhausgasemissionen und Einsparpotentialen bei \
                 jDPG-Veranstaltungen ermöglichen.\
                 Wenn du Fragen hast oder Interesse, an dem Projekt mitzuwirken, melde dich gerne \
-                beim <a href = "https://www.dpg-physik.de/vereinigungen/fachuebergreifend/ak/akjdpg/\
-                wir/arbeitsteams/nachhaltigkeit/nachhaltigkeit">Arbeitsteam Nachhaltigkeit</a>.\
+                beim <a href = "https://www.dpg-physik.de/vereinigungen/fachuebergreifend/ak/akjdpg/wir/arbeitsteams/nachhaltigkeit">Arbeitsteam Nachhaltigkeit</a>.\
                 <br><br>Anmerkung: Alle Treibhausgaswerte werden übrigens in CO<sub>2</sub>-Äquivalenten angegeben \
                 (CO<sub>2eq</sub>), auch wenn die Bezeichnung "CO<sub>2</sub>" verwendet wird.\
                  Andere Treibhausgase wie beispielsweise Methan sind in \
